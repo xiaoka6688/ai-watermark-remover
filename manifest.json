@@ -96,6 +96,12 @@
       "run_at": "document_start"
     },
     {
+      "matches": ["*://xyq.jianying.com/*"],
+      "js": ["xyq/inject.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
       "matches": ["https://jimeng.jianying.com/*"],
       "js": ["jimeng_image/content.js"],
       "css": ["jimeng_image/styles.css"],
@@ -107,17 +113,5 @@
       "run_at": "document_end"
     }
   ],
-  "web_accessible_resources": [
-    {
-      "resources": ["dreamina/interceptor.js"],
-      "matches": [
-        "https://dreamina.capcut.com/*",
-        "https://jimeng.jianying.com/*"
-      ]
-    },
-    {
-      "resources": ["xyq/inject.js"],
-      "matches": ["*://xyq.jianying.com/*"]
-    }
-  ]
+  "web_accessible_resources": []
 }

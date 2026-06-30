@@ -11,6 +11,11 @@
 
 ### 已完成（本会话）
 
+- [x] **P1-12 CSP 兼容性检查**
+  - 发现 `xyq/content.js` 用 `document.createElement('script')` 注入 `inject.js`——会被页面 CSP 阻止
+  - 修复：改为 manifest `content_scripts` + `world: "MAIN"` 声明注入（由扩展系统注入，绕过 CSP）
+  - 清理 `web_accessible_resources`（移除 `dreamina/interceptor.js` 和 `xyq/inject.js` 的多余条目）
+  - 检查结论：5 个 MAIN world 脚本中，4 个无 CSP 风险，1 个已修复
 - [x] **P1-11 关键路径单测**
   - 新增 `lib/utils.js`：提取 6 个核心纯函数（`formatFilename` / `createDedupChecker` / `findAllKeysInJson` / `extractImageUrlsFromCreations` / `parseAbilityParam` / `patchDurationBody`）
   - 引入 Jest 测试框架（`package.json` + `npm install`）

@@ -43,11 +43,9 @@
     const downloadSvgTemplate = createDownloadSvg();
     const disabledSvgTemplate = createDisabledSvg();
 
-    // ===== 1. 注入 inject.js 到 Main World =====
-    const script = document.createElement('script');
-    script.src = chrome.runtime.getURL('inject.js');
-    script.onload = function () { this.remove(); };
-    (document.head || document.documentElement).appendChild(script);
+    // ===== 1. inject.js 已通过 manifest MAIN world 声明注入（CSP 安全） =====
+    // 旧方案：document.createElement('script') 会被页面 CSP 阻止
+    // 新方案：manifest.json content_scripts + world:"MAIN" 由扩展系统注入
 
     // ===== 2. 监听 inject.js 发来的扫描结果 =====
     window.addEventListener('message', (event) => {

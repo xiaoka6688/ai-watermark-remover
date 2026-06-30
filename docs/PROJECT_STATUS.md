@@ -23,7 +23,7 @@
   - `74cb9cd` chore: 添加 .gitattributes 强制 LF 行尾
 
 **待办（下个会话做）**：
-- [ ] **P1-12 CSP 兼容性检查**
+- [ ] **Phase 2 启动**（可灵 AI / Vidu / PixVerse）或 **GitHub 仓库创建 + 推送**
 
 **变更文件清单**：
 - 新增 `.gitignore`、`.gitattributes`
@@ -203,7 +203,7 @@
 | P1-09 下载进度反馈 | 🟢 已完成 | 2026-07-01 | downloads.onChanged；broadcastProgress 500ms 节流；forwarder+dreamina 按钮百分比 |
 | P1-10 统一日志 | 🟢 已完成 | 2026-07-01 | 11 个文件前缀统一为 [AI去水印·模块名] |
 | P1-11 关键路径单测 | 🟢 已完成 | 2026-07-01 | Jest；lib/utils.js 提取 6 个纯函数；30 个测试全部通过 |
-| P1-12 CSP 检查 | ⚪ 未开始 | — | |
+| P1-12 CSP 检查 | 🟢 已完成 | 2026-07-01 | xyq inject.js 改 manifest MAIN world；清理 web_accessible_resources |
 
 **Phase 1 总进度**：0 / 12（0%）
 
@@ -250,21 +250,20 @@
 
 ### 当前正在做
 
-✅ **P1-11 关键路径单测**（已完成 2026-07-01）
+✅ **P1-12 CSP 兼容性检查**（已完成 2026-07-01）
 
 ### 下一个该做的
 
-📌 **P1-12：CSP 兼容性检查**
+🎉 **Phase 1 全部完成！** 12/12 任务已完成。
 
-任务描述：
-- 检查所有 `world: "MAIN"` 注入的脚本在目标站点的 CSP 策略下是否能正常运行
-- 目标站点：doubao.com / dreamina.capcut.com / jimeng.jianying.com / xyq.jianying.com / qianwen.com
-- 重点检查：`JSON.parse` 包装、`fetch` 包装、`XMLHttpRequest` 包装是否被 CSP 阻止
+下一步进入 **Phase 2 · 扩展阶段**：
+- P2-01 可灵 AI 站点支持
+- P2-02 Vidu 站点支持
+- P2-03 PixVerse 站点支持
+- P2-04 下载历史归档
+- ...（详见 PROJECT_PLAN.md Phase 2）
 
-验收：
-- [ ] 各站点 MAIN world 注入正常（控制台看到加载日志）
-- [ ] 无 CSP 违规错误
-- [ ] 现行功能未受影响
+或先创建 GitHub 仓库并推送代码（用户之前提到的计划）。
 
 ### 关键文件位置速查
 
