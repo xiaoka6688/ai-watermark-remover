@@ -39,6 +39,7 @@ function saveVideoListToStorage(arr, callback) {
   chrome.storage.local.set({ [VIDEO_LIST_KEY]: toSave }, () => {
     if (chrome.runtime.lastError) {
       console.warn('[AI去水印] 保存 videoList 失败:', chrome.runtime.lastError.message);
+      notify('warn', '保存视频列表失败: ' + chrome.runtime.lastError.message, 'videoList');
     }
     if (typeof callback === 'function') callback();
   });
@@ -60,6 +61,40 @@ function appendVideosAndSave(currentList, newData, callback) {
 
 // SW 启动时预热缓存（避免第一次 GET_VIDEO_LIST 等待）
 loadVideoListFromStorage();
+
+// ==================== 统一错误通知 ====================
+// notify('error'|'warn'|'info', '消息内容', '可选上下文')
+// 写入 chrome.storage.local，popup 启动时读取 + storage 变化时实时弹 toast
+const NOTIFY_KEY = 'notifications';
+const NOTIFY_MAX = 20;
+
+function notify(level, msg, context) {
+  const entry = {
+    level,   // 'error' | 'warn' | 'info'
+    msg: String(msg),
+    context: context || '',
+    time: Date.now()
+  };
+  console[level === 'error' ? 'error' : level === 'warn' ? 'warn' : 'log'](
+    `[AI去水印] ${context ? '(' + context + ') ' : ''}${msg}`
+  );
+  chrome.storage.local.get([NOTIFY_KEY], (result) => {
+    const list = Array.isArray(result[NOTIFY_KEY]) ? result[NOTIFY_KEY] : [];
+    list.push(entry);
+    // 保留最新 NOTIFY_MAX 条
+    const trimmed = list.length > NOTIFY_MAX ? list.slice(-NOTIFY_MAX) : list;
+    chrome.storage.local.set({ [NOTIFY_KEY]: trimmed });
+  });
+}
+
+// popup 读取后清空
+function consumeNotifications(callback) {
+  chrome.storage.local.get([NOTIFY_KEY], (result) => {
+    const list = Array.isArray(result[NOTIFY_KEY]) ? result[NOTIFY_KEY] : [];
+    chrome.storage.local.remove([NOTIFY_KEY]);
+    if (typeof callback === 'function') callback(list);
+  });
+}
 
 // ==================== 豆包分享API（回退方案） ====================
 
@@ -183,7 +218,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       const filename = `${sanitizedId}.mp4`;
       downloadVideo(data.videoUrl, filename, false)
         .then(() => sendResponse({ success: true }))
-        .catch(error => sendResponse({ success: false, error: error.message }));
+        .catch(error => {
+          notify('error', '视频下载失败: ' + error.message, 'doubao_video');
+          sendResponse({ success: false, error: error.message });
+        });
     } else {
       sendResponse({ success: true });
     }
@@ -244,6 +282,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
 
+  // ---- 读取并清空通知队列（popup 用） ----
+  if (message.type === 'CONSUME_NOTIFICATIONS') {
+    consumeNotifications(function(list) {
+      sendResponse({ success: true, data: list });
+    });
+    return true;
+  }
+
   // ---- 豆包主动下载（popup 触发） ----
   if (message.type === 'startVideoDownload') {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -278,6 +324,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       conflictAction: 'uniquify'
     }, (downloadId) => {
       if (chrome.runtime.lastError) {
+        notify('error', '文件下载失败: ' + chrome.runtime.lastError.message, 'download');
         sendResponse({ success: false, error: chrome.runtime.lastError.message });
       } else {
         sendResponse({ success: true, downloadId });
@@ -316,6 +363,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           setTimeout(() => URL.revokeObjectURL(url), 5000);
         }
       } catch (e) {
+        notify('error', '图片下载失败: ' + e.message, 'downloadImage');
         sendResponse({ success: false, error: e.message });
       }
     })();

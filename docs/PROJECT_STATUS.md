@@ -23,7 +23,7 @@
   - `74cb9cd` chore: 添加 .gitattributes 强制 LF 行尾
 
 **待办（下个会话做）**：
-- [ ] **P1-05 统一错误通知**
+- [ ] **P1-06 跨标签页去重**
 
 **变更文件清单**：
 - 新增 `.gitignore`、`.gitattributes`
@@ -196,7 +196,7 @@
 | P1-02 清理 .bak | 🟢 已完成 | 2026-07-01 | 初始化 git 仓库；挪到 docs/archive/；3 次规范提交（.gitignore / v1.2.0 主功能 / .gitattributes） |
 | P1-03 治理 doubao-downloader | 🟢 已完成 | 2026-07-01 | 22880 行 → ~280 行轻量版；JSON.parse 拦截保留；旧版归档 docs/archive/ |
 | P1-04 持久化 15s 开关 | 🟢 已完成 | 2026-07-01 | postMessage 桥接 chrome.storage.local；popup 滑块开关；统一浮窗 |
-| P1-05 统一错误通知 | ⚪ 未开始 | — | |
+| P1-05 统一错误通知 | 🟢 已完成 | 2026-07-01 | notify() 内嵌 background.js；popup toast 实时+启动积压 |
 | P1-06 跨标签去重 | ⚪ 未开始 | — | |
 | P1-07 命名模板 | ⚪ 未开始 | — | |
 | P1-08 Options Page | ⚪ 未开始 | — | |
@@ -250,21 +250,20 @@
 
 ### 当前正在做
 
-✅ **P1-04 持久化 15s 浮窗开关**（已完成 2026-07-01）
+✅ **P1-05 统一错误通知**（已完成 2026-07-01）
 
 ### 下一个该做的
 
-📌 **P1-05：统一错误通知**
+📌 **P1-06：跨标签页去重**
 
 任务描述：
-- 当前所有 catch 块都用 `console.error`，用户在 popup 里看不到任何错误提示
-- 需要统一封装 `notify(level, msg)` 函数
-- popup 顶部用 toast 显示错误/成功信息
-- SW 侧的错误通过 `chrome.runtime.sendMessage` 转发到 popup
+- 当前 dreamina 模块在多个标签页同时打开时，同一视频可能被下载多次
+- 需要用 URL hash 做短期去重（SW 侧 `pendingDownloads` 已有部分机制）
+- 统一所有模块的去重策略
 
 验收：
-- [ ] 所有 catch 块调用统一 `notify` 入口
-- [ ] popup 能看到下载失败/成功的 toast 提示
+- [ ] 同一视频在多个标签页打开时只下载一次
+- [ ] 去重不影响不同视频的正常下载
 - [ ] 现行功能未受影响
 
 ### 关键文件位置速查

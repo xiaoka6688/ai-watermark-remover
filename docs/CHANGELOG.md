@@ -11,6 +11,11 @@
 
 ### 已完成（本会话）
 
+- [x] **P1-05 统一错误通知**
+  - `background.js` 新增 `notify(level, msg, context)` 函数（写入 `chrome.storage.local`，限 20 条）
+  - 新增 `consumeNotifications()` + `CONSUME_NOTIFICATIONS` 消息（popup 读取后清空）
+  - 关键 catch 块（视频下载/文件下载/图片下载/storage 保存失败）调用 `notify`
+  - `popup.html` 新增通知 toast 系统：启动时读积压通知 + `chrome.storage.onChanged` 实时监听
 - [x] **P1-04 持久化 15s 浮窗开关**
   - `duration15.js` 从 `localStorage` 改为 postMessage 桥接 → `forwarder.js` → `chrome.storage.local`
   - `forwarder.js` 新增 3 个桥接消息：`xq_d15_get_state` / `xq_d15_set_enabled` / `xq_d15_set_duration`

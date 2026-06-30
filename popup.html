@@ -83,6 +83,48 @@
   <button class="btn" id="refreshBtn">刷新统计</button>
   <button class="btn" id="clearBtn" style="background:#ef4444;margin-left:6px;">清空数据</button>
   <script>
+    // ========== 统一通知 toast ==========
+    function showNotifyToast(entry) {
+      const colors = { error: '#ef4444', warn: '#f59e0b', info: '#2563eb' };
+      const toast = document.createElement('div');
+      toast.style.cssText = `
+        position: fixed; top: 8px; left: 8px; right: 8px; z-index: 9999;
+        background: ${colors[entry.level] || colors.info}; color: #fff;
+        padding: 8px 12px; border-radius: 8px; font-size: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        opacity: 0; transition: opacity 0.3s;
+      `;
+      const ctx = entry.context ? `[${entry.context}] ` : '';
+      toast.textContent = `${ctx}${entry.msg}`;
+      document.body.appendChild(toast);
+      requestAnimationFrame(() => { toast.style.opacity = '1'; });
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    // 启动时读取并显示积压的通知
+    chrome.runtime.sendMessage({type: 'CONSUME_NOTIFICATIONS'}, (resp) => {
+      if (resp?.success && resp.data?.length) {
+        resp.data.forEach((entry, i) => {
+          setTimeout(() => showNotifyToast(entry), i * 500); // 错开显示
+        });
+      }
+    });
+
+    // 实时监听 storage 变化（SW 写入 notification 时立即弹 toast）
+    chrome.storage.onChanged.addListener((changes, area) => {
+      if (area === 'local' && changes.notifications) {
+        const list = changes.notifications.newValue;
+        if (Array.isArray(list)) {
+          list.forEach((entry) => showNotifyToast(entry));
+          // 读完后清空（避免 popup 关闭再打开重复显示）
+          chrome.storage.local.remove('notifications');
+        }
+      }
+    });
+
     // ========== 豆包视频统计 ==========
     function refreshVideoCount() {
       chrome.runtime.sendMessage({type: 'GET_VIDEO_LIST'}, (resp) => {
