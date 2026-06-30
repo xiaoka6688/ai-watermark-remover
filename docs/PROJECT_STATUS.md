@@ -23,7 +23,7 @@
   - `74cb9cd` chore: 添加 .gitattributes 强制 LF 行尾
 
 **待办（下个会话做）**：
-- [ ] **P1-11 关键路径单测**
+- [ ] **P1-12 CSP 兼容性检查**
 
 **变更文件清单**：
 - 新增 `.gitignore`、`.gitattributes`
@@ -202,7 +202,7 @@
 | P1-08 Options Page | 🟢 已完成 | 2026-07-01 | options.html+js；站点开关/15s/去重/命名模板/数据管理 |
 | P1-09 下载进度反馈 | 🟢 已完成 | 2026-07-01 | downloads.onChanged；broadcastProgress 500ms 节流；forwarder+dreamina 按钮百分比 |
 | P1-10 统一日志 | 🟢 已完成 | 2026-07-01 | 11 个文件前缀统一为 [AI去水印·模块名] |
-| P1-11 关键路径单测 | ⚪ 未开始 | — | |
+| P1-11 关键路径单测 | 🟢 已完成 | 2026-07-01 | Jest；lib/utils.js 提取 6 个纯函数；30 个测试全部通过 |
 | P1-12 CSP 检查 | ⚪ 未开始 | — | |
 
 **Phase 1 总进度**：0 / 12（0%）
@@ -250,25 +250,20 @@
 
 ### 当前正在做
 
-✅ **P1-10 统一日志分级**（已完成 2026-07-01）
+✅ **P1-11 关键路径单测**（已完成 2026-07-01）
 
 ### 下一个该做的
 
-📌 **P1-11：关键路径单测**
+📌 **P1-12：CSP 兼容性检查**
 
 任务描述：
-- 拦截逻辑（递归遍历 JSON、SSE 解析、URL 改写）都适合加 Jest 单测
-- 核心测试点：
-  - `formatFilename()` 模板解析
-  - `isDuplicateDownload()` 去重逻辑
-  - `findAllKeysInJson()` 递归搜索
-  - `extractFromCreations()` 豆包图片提取
-  - `patchBody()` 15s 时长改写
-- 引入 Jest（或 Vitest）+ 创建 `tests/` 目录
+- 检查所有 `world: "MAIN"` 注入的脚本在目标站点的 CSP 策略下是否能正常运行
+- 目标站点：doubao.com / dreamina.capcut.com / jimeng.jianying.com / xyq.jianying.com / qianwen.com
+- 重点检查：`JSON.parse` 包装、`fetch` 包装、`XMLHttpRequest` 包装是否被 CSP 阻止
 
 验收：
-- [ ] 至少 5 个核心函数有单测覆盖
-- [ ] `npm test` 或 `npx jest` 能跑通
+- [ ] 各站点 MAIN world 注入正常（控制台看到加载日志）
+- [ ] 无 CSP 违规错误
 - [ ] 现行功能未受影响
 
 ### 关键文件位置速查

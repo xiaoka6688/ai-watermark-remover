@@ -11,6 +11,11 @@
 
 ### 已完成（本会话）
 
+- [x] **P1-11 关键路径单测**
+  - 新增 `lib/utils.js`：提取 6 个核心纯函数（`formatFilename` / `createDedupChecker` / `findAllKeysInJson` / `extractImageUrlsFromCreations` / `parseAbilityParam` / `patchDurationBody`）
+  - 引入 Jest 测试框架（`package.json` + `npm install`）
+  - 新增 `tests/utils.test.js`：30 个测试用例，6 个 describe 块
+  - `npm test` 全部通过
 - [x] **P1-10 统一日志分级**
   - 所有模块日志前缀统一为 `[AI去水印·模块名]` 格式
   - 模块映射：background / 豆包视频 / Dreamina / 即梦图片 / 千问 / 小云雀 / 豆包图片 / 15s
