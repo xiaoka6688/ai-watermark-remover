@@ -1,0 +1,95 @@
+# ========== 操作系统垃圾 ==========
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+$RECYCLE.BIN/
+
+# ========== Windows 资源管理器常见临时文件 ==========
+*.tmp
+*.temp
+*~
+
+# ========== IDE / 编辑器 ==========
+.vscode/
+.idea/
+*.swp
+*.swo
+*.iml
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
+
+# ========== Node.js / 构建工具（如未来引入 Vite） ==========
+node_modules/
+dist/
+build/
+.cache/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.vite/
+
+# ========== Python（logo 工具用） ==========
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.venv/
+
+# ========== 浏览器扩展相关 ==========
+# 加载扩展时 Chrome 自动生成的 Profile 副本（如果误提交进来）
+chrome-profile/
+*.crx
+*.pem
+
+# ========== 第三方黑盒产物（可选跟踪，但要明确标记） ==========
+# 注意：doubao_image/doubao-downloader.user.js 和 xyq/jszip.min.js
+# 严格说应该进 git 以保证其他人能直接 build 出来。
+# 但这两个是外部打包产物，未来重构时应该替换。
+# 现阶段先跟踪它们，commit 信息里标注来源版本。
+
+# ========== 截图 / 临时分析文件 ==========
+screenshots/
+analysis/
+*.har
+*.network-request
+*.network-response
+*.heapsnapshot
+trace.json
+trace.json.gz
+
+# ========== 环境变量 / 密钥（防泄漏） ==========
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+secrets/
+
+# ========== 用户特定文件 ==========
+# 用户自己测试用的占位文件
+test-*.png
+test-*.jpg
+test-*.mp4
+scratch-*
+debug-*
+
+# ========== 文档构建产物（如未来引入 mkdocs/hugo） ==========
+docs/_build/
+docs/.cache/
+site/
+
+# ========== 排除 vs 工作区根目录的某些下载中文件 ==========
+# 比如 Chrome 下载到本项目目录的临时文件
+downloads/
+
+# ========== 其它 ==========
+*.bak       # 旧版本备份（已通过 git 历史管理）
+*.orig      # git 冲突解决时自动生成
+*.rej       # 同上
