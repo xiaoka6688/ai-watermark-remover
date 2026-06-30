@@ -11,6 +11,12 @@
 
 ### 已完成（本会话）
 
+- [x] **P1-09 下载进度反馈**
+  - `background.js` 新增 `chrome.downloads.onChanged` 监听器
+  - `activeDownloads` Map 跟踪活跃下载（id → percent/totalBytes）
+  - `broadcastProgress()` 广播进度到所有标签页（500ms 节流）
+  - `doubao_video/forwarder.js` 新增 `updateButtonProgress()` 显示百分比
+  - `dreamina/content.js` 新增 `DOWNLOAD_PROGRESS` 监听器显示百分比
 - [x] **P1-08 Options Page**
   - 新增 `options.html`（完整设置页面，渐变头部 + 卡片布局）
   - 新增 `options.js`（加载/保存/重置逻辑）

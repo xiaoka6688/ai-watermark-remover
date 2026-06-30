@@ -299,7 +299,44 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     sendResponse({ success: true });
     return true;
   }
+
+  // 下载进度更新
+  if (msg.type === 'DOWNLOAD_PROGRESS') {
+    updateButtonProgress(msg.percent, msg.state);
+  }
 });
+
+// 进度显示：找到当前 busy 状态的按钮更新文本
+function updateButtonProgress(percent, state) {
+  const busyBtn = document.querySelector('.doubao-dl-btn.doubao-dl-busy');
+  if (!busyBtn) return;
+
+  if (state === 'complete') {
+    // 完成由 videoDownloadResult 处理，这里不重复
+  } else if (state === 'interrupted') {
+    busyBtn.classList.remove('doubao-dl-busy');
+    busyBtn.classList.add('doubao-dl-error');
+    busyBtn.innerHTML = ERROR_ICON;
+    busyBtn.disabled = false;
+    setTimeout(() => {
+      busyBtn.innerHTML = DOWNLOAD_ICON;
+      busyBtn.classList.remove('doubao-dl-error');
+    }, 3000);
+  } else if (percent >= 0) {
+    // 显示百分比
+    const existingProgress = busyBtn.querySelector('.dl-progress-text');
+    if (existingProgress) {
+      existingProgress.textContent = `${percent}%`;
+    } else {
+      const span = document.createElement('span');
+      span.className = 'dl-progress-text';
+      span.style.cssText = 'font-size:10px;color:#fff;font-weight:700;';
+      span.textContent = `${percent}%`;
+      busyBtn.innerHTML = '';
+      busyBtn.appendChild(span);
+    }
+  }
+}
 
 // ==================== 初始化 ====================
 

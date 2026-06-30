@@ -45,7 +45,7 @@
 |---|---|---|---|---|
 | P1-07 | **文件命名模板** | 🟢 | 2026-07-01 | 0.3d | `formatFilename()` 内嵌 background.js；7 个模板变量；5 个入口全部接入；Options Page 预留接口 |
 | P1-08 | **Options Page** | 🟢 | 2026-07-01 | 0.5d | `options.html` + `options.js`；站点开关/15s/去重/命名模板/数据管理；manifest 注册 |
-| P1-09 | **下载进度反馈**（`chrome.downloads.onChanged`） | ⚪ | 0.5d | 大文件下载时按钮显示百分比 |
+| P1-09 | **下载进度反馈** | 🟢 | 2026-07-01 | 0.3d | `chrome.downloads.onChanged` 监听；`broadcastProgress()` 500ms 节流；forwarder + dreamina 按钮显示百分比 |
 
 ## 1.3 稳定性
 

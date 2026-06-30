@@ -344,3 +344,28 @@ document.addEventListener('mousemove', (e) => {
         }
     });
 });
+
+// ==================== 下载进度监听 ====================
+chrome.runtime.onMessage.addListener((msg) => {
+    if (msg.type === 'DOWNLOAD_PROGRESS') {
+        const busyBtn = document.querySelector('.dreamina-dl-btn.is-busy');
+        if (!busyBtn) return;
+
+        if (msg.state === 'complete') {
+            busyBtn.classList.remove('is-busy');
+            setTimeout(() => { busyBtn.classList.remove('is-visible'); }, 2000);
+        } else if (msg.state === 'interrupted') {
+            busyBtn.classList.remove('is-busy');
+        } else if (msg.percent >= 0) {
+            // 显示百分比
+            let progressEl = busyBtn.querySelector('.dl-progress');
+            if (!progressEl) {
+                progressEl = document.createElement('span');
+                progressEl.className = 'dl-progress';
+                progressEl.style.cssText = 'font-size:10px;color:#fff;font-weight:700;position:absolute;';
+                busyBtn.appendChild(progressEl);
+            }
+            progressEl.textContent = `${msg.percent}%`;
+        }
+    }
+});

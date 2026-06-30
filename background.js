@@ -28,6 +28,61 @@ function isDuplicateDownload(url) {
   return false;
 }
 
+// ==================== 下载进度跟踪 ====================
+const activeDownloads = new Map(); // downloadId → { url, filename, percent, totalBytes }
+
+chrome.downloads.onChanged.addListener((delta) => {
+  const id = delta.id;
+
+  // 下载开始 → 记录
+  if (delta.state?.current === 'in_progress') {
+    if (!activeDownloads.has(id)) {
+      activeDownloads.set(id, { url: '', filename: '', percent: 0, totalBytes: 0 });
+    }
+    const entry = activeDownloads.get(id);
+    if (delta.totalBytes?.current) entry.totalBytes = delta.totalBytes.current;
+    if (delta.bytesReceived?.current && entry.totalBytes > 0) {
+      entry.percent = Math.round((delta.bytesReceived.current / entry.totalBytes) * 100);
+    }
+    // 广播进度到所有标签页
+    broadcastProgress(id, entry.percent, 'in_progress');
+  }
+
+  // 下载完成/失败/取消 → 清理
+  if (delta.state?.current === 'complete' || delta.state?.current === 'interrupted') {
+    const entry = activeDownloads.get(id);
+    if (entry) {
+      broadcastProgress(id, delta.state?.current === 'complete' ? 100 : -1, delta.state.current);
+    }
+    activeDownloads.delete(id);
+  }
+});
+
+// 进度广播节流（每 500ms 最多广播一次同 id）
+const progressThrottle = new Map(); // id → lastBroadcastTime
+function broadcastProgress(downloadId, percent, state) {
+  const now = Date.now();
+  const last = progressThrottle.get(downloadId) || 0;
+  if (state === 'in_progress' && now - last < 500 && percent < 100) return;
+  progressThrottle.set(downloadId, now);
+
+  chrome.tabs.query({}, (tabs) => {
+    for (const tab of tabs) {
+      try {
+        chrome.tabs.sendMessage(tab.id, {
+          type: 'DOWNLOAD_PROGRESS',
+          downloadId, percent, state
+        }).catch(() => {});
+      } catch (_) {}
+    }
+  });
+
+  // 清理过期节流记录
+  if (state === 'complete' || state === 'interrupted') {
+    progressThrottle.delete(downloadId);
+  }
+}
+
 // ========== 豆包视频数据持久化 ==========
 // 旧版用 const videoList = [] 存内存，SW 30s 休眠后清空 → popup 统计重置
 // 改为：chrome.storage.local 持久化 + 内存缓存（SW 实例存活期间复用）
