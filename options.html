@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI去水印 · 设置</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background: #f0f2f5; color: #1a1a2e; min-height: 100vh;
+    }
+    .header {
+      background: linear-gradient(135deg, #5aaaff, #9b82e6);
+      color: #fff; padding: 32px 24px; text-align: center;
+    }
+    .header h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+    .header p { font-size: 13px; opacity: 0.85; }
+    .container { max-width: 640px; margin: 24px auto; padding: 0 16px; }
+    .card {
+      background: #fff; border-radius: 12px; padding: 20px;
+      margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .card-title {
+      font-size: 15px; font-weight: 600; color: #1a1a2e;
+      margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+    }
+    .card-title .icon { font-size: 18px; }
+    .row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 0; border-bottom: 1px solid #f0f0f0;
+    }
+    .row:last-child { border-bottom: none; }
+    .row-label { font-size: 14px; color: #333; }
+    .row-desc { font-size: 12px; color: #888; margin-top: 2px; }
+    /* Toggle switch */
+    .toggle { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle .slider {
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: #ccc; border-radius: 24px; cursor: pointer; transition: 0.3s;
+    }
+    .toggle .slider::before {
+      content: ''; position: absolute; height: 18px; width: 18px;
+      left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: 0.3s;
+    }
+    .toggle input:checked + .slider { background: #2563eb; }
+    .toggle input:checked + .slider::before { transform: translateX(20px); }
+    /* Input */
+    .input-row { margin-top: 12px; }
+    .input-row label { display: block; font-size: 13px; color: #555; margin-bottom: 6px; }
+    .input-row input[type="text"] {
+      width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px;
+      font-size: 13px; font-family: 'Consolas', 'Monaco', monospace;
+      transition: border-color 0.2s;
+    }
+    .input-row input[type="text"]:focus { outline: none; border-color: #2563eb; }
+    .input-row .hint { font-size: 11px; color: #aaa; margin-top: 4px; }
+    /* Buttons */
+    .btn-row { display: flex; gap: 10px; margin-top: 16px; }
+    .btn {
+      padding: 10px 20px; border: none; border-radius: 8px;
+      font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s;
+    }
+    .btn-primary { background: #2563eb; color: #fff; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-secondary { background: #e5e7eb; color: #374151; }
+    .btn-secondary:hover { background: #d1d5db; }
+    .btn-danger { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+    .btn-danger:hover { background: #fee2e2; }
+    /* Toast */
+    .toast {
+      position: fixed; top: 16px; right: 16px; z-index: 9999;
+      padding: 10px 20px; border-radius: 8px; font-size: 13px;
+      color: #fff; opacity: 0; transition: opacity 0.3s;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .toast.show { opacity: 1; }
+    .toast.success { background: #10b981; }
+    .toast.error { background: #ef4444; }
+    .toast.info { background: #2563eb; }
+    /* Version */
+    .footer { text-align: center; padding: 24px; font-size: 12px; color: #aaa; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🎨 AI去水印 · 设置</h1>
+    <p>统一管理所有配置项</p>
+  </div>
+
+  <div class="container">
+    <!-- 站点模块开关 -->
+    <div class="card">
+      <div class="card-title"><span class="icon">🌐</span> 站点模块</div>
+      <div class="row">
+        <div><div class="row-label">Dreamina / 即梦（视频）</div><div class="row-desc">dreamina.capcut.com / jimeng.jianying.com</div></div>
+        <label class="toggle"><input type="checkbox" id="site_dreamina" checked><span class="slider"></span></label>
+      </div>
+      <div class="row">
+        <div><div class="row-label">豆包（视频 + 图片 + 15s）</div><div class="row-desc">www.doubao.com</div></div>
+        <label class="toggle"><input type="checkbox" id="site_doubao" checked><span class="slider"></span></label>
+      </div>
+      <div class="row">
+        <div><div class="row-label">即梦（图片去水印）</div><div class="row-desc">jimeng.jianying.com</div></div>
+        <label class="toggle"><input type="checkbox" id="site_jimeng" checked><span class="slider"></span></label>
+      </div>
+      <div class="row">
+        <div><div class="row-label">小云雀（批量下载）</div><div class="row-desc">xyq.jianying.com</div></div>
+        <label class="toggle"><input type="checkbox" id="site_xyq" checked><span class="slider"></span></label>
+      </div>
+      <div class="row">
+        <div><div class="row-label">千问（图片 + 视频）</div><div class="row-desc">www.qianwen.com</div></div>
+        <label class="toggle"><input type="checkbox" id="site_qianwen" checked><span class="slider"></span></label>
+      </div>
+    </div>
+
+    <!-- 功能开关 -->
+    <div class="card">
+      <div class="card-title"><span class="icon">⚙️</span> 功能</div>
+      <div class="row">
+        <div><div class="row-label">豆包 15s 时长扩展</div><div class="row-desc">视频生成页多出 15s 选项（需刷新页面生效）</div></div>
+        <label class="toggle"><input type="checkbox" id="toggle_15s"><span class="slider"></span></label>
+      </div>
+      <div class="row">
+        <div><div class="row-label">下载去重</div><div class="row-desc">60 秒内同一 URL 不重复下载</div></div>
+        <label class="toggle"><input type="checkbox" id="toggle_dedup" checked><span class="slider"></span></label>
+      </div>
+    </div>
+
+    <!-- 文件命名 -->
+    <div class="card">
+      <div class="card-title"><span class="icon">📝</span> 文件命名</div>
+      <div class="input-row">
+        <label>命名模板</label>
+        <input type="text" id="filename_template" placeholder="{site}_{date}_{idx}.{ext}">
+        <div class="hint">
+          可用变量：<code>{site}</code> <code>{title}</code> <code>{date}</code> <code>{time}</code> <code>{idx}</code> <code>{ext}</code> <code>{id}</code><br>
+          示例：<code>doubao_{title}_{date}_{idx}.{ext}</code> → <code>doubao_可爱猫咪_20260701_01.mp4</code>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn_save_template">保存模板</button>
+        <button class="btn btn-secondary" id="btn_reset_template">恢复默认</button>
+      </div>
+    </div>
+
+    <!-- 数据管理 -->
+    <div class="card">
+      <div class="card-title"><span class="icon">🗑️</span> 数据管理</div>
+      <div class="row">
+        <div><div class="row-label">清空豆包视频统计</div><div class="row-desc">清除已捕获的视频列表</div></div>
+        <button class="btn btn-danger" id="btn_clear_videos">清空</button>
+      </div>
+      <div class="row">
+        <div><div class="row-label">清空下载记录</div><div class="row-desc">清除去重记录和已下载标记</div></div>
+        <button class="btn btn-danger" id="btn_clear_downloads">清空</button>
+      </div>
+      <div class="row">
+        <div><div class="row-label">清空通知队列</div><div class="row-desc">清除所有错误/警告通知</div></div>
+        <button class="btn btn-danger" id="btn_clear_notifications">清空</button>
+      </div>
+      <div class="row">
+        <div><div class="row-label">恢复全部默认设置</div><div class="row-desc">重置所有配置项为默认值</div></div>
+        <button class="btn btn-danger" id="btn_reset_all">重置</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    AI去水印 v1.2.0 · Phase 1 优化版
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>

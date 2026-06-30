@@ -23,7 +23,7 @@
   - `74cb9cd` chore: 添加 .gitattributes 强制 LF 行尾
 
 **待办（下个会话做）**：
-- [ ] **P1-08 Options Page**
+- [ ] **P1-09 下载进度反馈**
 
 **变更文件清单**：
 - 新增 `.gitignore`、`.gitattributes`
@@ -199,7 +199,7 @@
 | P1-05 统一错误通知 | 🟢 已完成 | 2026-07-01 | notify() 内嵌 background.js；popup toast 实时+启动积压 |
 | P1-06 跨标签去重 | 🟢 已完成 | 2026-07-01 | downloadedUrls Map + TTL 60s；5 个下载入口全部接入 |
 | P1-07 命名模板 | 🟢 已完成 | 2026-07-01 | formatFilename()；7 个模板变量；5 个入口接入；Options Page 预留 |
-| P1-08 Options Page | ⚪ 未开始 | — | |
+| P1-08 Options Page | 🟢 已完成 | 2026-07-01 | options.html+js；站点开关/15s/去重/命名模板/数据管理 |
 | P1-09 下载进度反馈 | ⚪ 未开始 | — | |
 | P1-10 统一日志 | ⚪ 未开始 | — | |
 | P1-11 关键路径单测 | ⚪ 未开始 | — | |
@@ -250,28 +250,21 @@
 
 ### 当前正在做
 
-✅ **P1-07 文件命名模板**（已完成 2026-07-01）
+✅ **P1-08 Options Page**（已完成 2026-07-01）
 
 ### 下一个该做的
 
-📌 **P1-08：Options Page**
+📌 **P1-09：下载进度反馈**
 
 任务描述：
-- 新增 `options.html`，统一管理所有配置项
-- 当前已有的可配置项：
-  - 15s 时长开关（`xq_d15_enabled`）
-  - 文件名模板（`filenameTemplate`）
-  - 下载去重 TTL（`downloadedUrls` 相关）
-- 新增配置项：
-  - 各站点模块开关（dreamina / doubao / qianwen / xyq / jimeng）
-  - 下载目录前缀
-- 在 `manifest.json` 注册 `options_page`
+- 大文件下载时用户看不到进度，不知道是否卡住
+- 利用 `chrome.downloads.onChanged` 监听下载进度
+- 在 popup 的下载按钮上显示百分比或进度条
 
 验收：
-- [ ] chrome://extensions 里点"详情"→"扩展程序选项"能打开
-- [ ] 15s 开关能在 Options Page 切换
-- [ ] 文件名模板能在 Options Page 编辑
-- [ ] 配置修改后实时生效
+- [ ] 大文件下载时按钮显示进度百分比
+- [ ] 下载完成后按钮显示成功状态
+- [ ] 现行功能未受影响
 
 ### 关键文件位置速查
 

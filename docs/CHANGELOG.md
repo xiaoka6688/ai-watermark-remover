@@ -11,6 +11,12 @@
 
 ### 已完成（本会话）
 
+- [x] **P1-08 Options Page**
+  - 新增 `options.html`（完整设置页面，渐变头部 + 卡片布局）
+  - 新增 `options.js`（加载/保存/重置逻辑）
+  - 功能：站点模块开关（5 个站点）、15s 时长开关、下载去重开关、文件名模板编辑、数据管理（清空统计/下载记录/通知/全部重置）
+  - `manifest.json` 注册 `options_page: "options.html"`
+  - `background.js` 新增 `GET_SITE_MODULES` 消息（content script 查询站点开关）
 - [x] **P1-07 文件命名模板**
   - `background.js` 新增 `formatFilename(data)` 函数
   - 模板变量：`{site}` / `{title}` / `{date}` / `{time}` / `{idx}` / `{ext}` / `{id}`

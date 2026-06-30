@@ -382,6 +382,25 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
 
+  // ---- 站点模块开关查询（content script 用） ----
+  if (message.type === 'GET_SITE_MODULES') {
+    chrome.storage.local.get(['site_modules'], (result) => {
+      const modules = result.site_modules || {};
+      // 默认全部启用
+      sendResponse({
+        success: true,
+        modules: {
+          dreamina: modules.dreamina !== false,
+          doubao: modules.doubao !== false,
+          jimeng: modules.jimeng !== false,
+          xyq: modules.xyq !== false,
+          qianwen: modules.qianwen !== false
+        }
+      });
+    });
+    return true;
+  }
+
   // ---- 豆包主动下载（popup 触发） ----
   if (message.type === 'startVideoDownload') {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
