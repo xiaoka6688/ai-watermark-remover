@@ -11,6 +11,11 @@
 
 ### 已完成（本会话）
 
+- [x] **P1-02 清理 `background.js.bak` + 初始化 git 仓库**
+  - 旧版 `background.js.bak`（385 行，含已下线的 zbgd.vip 授权验证机制）挪到 `docs/archive/background.js.v1.1.0.bak`
+  - 新建 `docs/archive/README.md`（归档机制 + 旧版 vs 新版对比表）
+  - 初始化 git 仓库：main 分支 + xiaoka6688 身份
+  - 3 次规范提交：`.gitignore` / v1.2.0 主功能 / `.gitattributes`
 - [x] **P1-01 持久化 videoList 到 chrome.storage.local**
   - 新增 `loadVideoListFromStorage()` / `saveVideoListToStorage()` / `appendVideosAndSave()` 三个工具函数
   - 内存缓存（`videoListCache`）+ Promise 并发保护（`videoListLoading`）
@@ -33,7 +38,6 @@
 
 ### 计划中
 
-- [ ] P1-02 清理 background.js.bak
 - [ ] P1-03 治理 doubao-downloader.user.js
 - [ ] P1-04 持久化 15s 浮窗开关
 - [ ] P1-05 统一错误通知

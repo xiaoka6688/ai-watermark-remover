@@ -33,7 +33,7 @@
 | ID | 任务 | 状态 | 负责人 | 预估工时 | 验收标准 |
 |---|---|---|---|---|---|
 | P1-01 | **持久化 `videoList` 到 `chrome.storage.local`** | 🟢 | 2026-07-01 | 0.5d | 内存缓存 + 并发保护 + 500 条 FIFO 软上限；新增 `CLEAR_VIDEO_LIST` 消息；popup 加清空按钮 |
-| P1-02 | **清理 `background.js.bak` 旧版** | ⚪ | - | 0.1d | 仓库仅保留现行版本，旧版挪到 git history |
+| P1-02 | **清理 `background.js.bak` 旧版** | 🟢 | 2026-07-01 | 0.1d | 初始化 git 仓库（main 分支 + xiaoka6688 身份）；挪到 `docs/archive/background.js.v1.1.0.bak`；写归档 README；3 次规范提交 |
 | P1-03 | **`doubao-downloader.user.js` 治理**（拆源码 or 替换） | ⚪ | - | 1d | 引入 `doubao_image/build.sh`，源码单独放 `src/` |
 | P1-04 | **`duration15.js` 持久化开关**（`chrome.storage.sync`） | ⚪ | - | 0.5d | 关闭后不需刷新即生效 |
 | P1-05 | **统一错误通知**（`notify(level, msg)` 封装） | ⚪ | - | 0.5d | 所有 catch 块调用统一入口，popup toast 可见 |

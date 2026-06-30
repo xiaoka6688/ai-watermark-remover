@@ -435,6 +435,70 @@ return resp;
 
 ---
 
+### ✅ git commit message 与内容必须匹配
+
+**场景**：`git add -A` 后只写了一个 `.gitattributes` 的 message，但实际包含所有项目文件（35 个）。
+
+**反例**：
+```
+commit 80a59eb
+chore: 添加 .gitattributes 强制 LF 行尾   ← message 只说了 1 个文件
+# 但实际包含 background.js / docs/ / manifest.json ... 全部项目文件
+```
+
+**正解**：
+```bash
+# 1. 软回退（保留暂存区内容，撤销 commit）
+git reset --soft HEAD~1
+
+# 2. 撤回特定文件的暂存
+git reset HEAD .gitattributes
+
+# 3. 重新提交主功能
+git commit -m "feat: v1.2.0 品牌重塑 + P1-01 持久化 + 文档体系
+
+- 品牌：从「小柒去水印插件」更名为「AI去水印」
+- P1-01：videoList 持久化到 chrome.storage.local
+- 文档：建立 docs/ 项目文档中心
+- ..."
+
+# 4. 再单独提交收尾文件
+git add .gitattributes
+git commit -m "chore: 添加 .gitattributes 强制 LF 行尾"
+```
+
+**教训**：
+- `git add -A` 是全局操作，commit message 必须覆盖所有新增文件
+- 提交前用 `git status --short` 确认暂存区内容
+- 用 `git log --stat HEAD` 事后核查提交包含的文件列表
+
+---
+
+### ✅ `.gitattributes` 强制 LF 行尾（Windows 项目必备）
+
+**问题**：Windows 上 `git add` 自动把 LF 转 CRLF，导致 diff 看到整行 ^M 污染。
+
+**正解**：在项目根目录创建 `.gitattributes`：
+```
+* text=auto eol=lf
+*.js   text eol=lf
+*.md   text eol=lf
+*.css  text eol=lf
+*.html text eol=lf
+*.json text eol=lf
+*.py   text eol=lf
+*.user.js text eol=lf   # 用户脚本（虽是文本但容易被误判）
+*.min.js  text eol=lf   # 压缩脚本
+# 显式声明二进制（避免 git 误改）
+*.png binary
+*.mp4 binary
+*.zip binary
+```
+
+参考：本项目 `.gitattributes`（2026-07-01 新建）
+
+---
+
 ## 🔧 调试技巧
 
 ### 🔍 查看 MAIN world 注入的脚本是否生效

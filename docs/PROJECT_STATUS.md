@@ -7,6 +7,39 @@
 
 ## 🚨 最新会话（追加在最上面，新会话覆盖到最顶端）
 
+### 会话 #5 · 2026-07-01
+
+**会话目标**：完成 P1-02（清理 .bak + 初始化 git 仓库）
+
+**完成事项**：
+- [x] 初始化 git 仓库（main 分支，xiaoka6688 身份）
+- [x] 创建 `.gitignore`（OS 垃圾 / IDE / Python / Node / 调试快照 / 密钥 / 归档 .bak）
+- [x] 创建 `.gitattributes`（强制 LF 行尾 + 显式声明二进制）
+- [x] `background.js.bak` 挪到 `docs/archive/background.js.v1.1.0.bak`
+- [x] 写 `docs/archive/README.md`（归档机制说明 + 旧版 vs 新版对比）
+- [x] 3 次规范提交：
+  - `939ce86` chore: 初始化仓库，添加 .gitignore
+  - `5d5fae7` feat: v1.2.0 品牌重塑 + P1-01 videoList 持久化 + 文档体系
+  - `74cb9cd` chore: 添加 .gitattributes 强制 LF 行尾
+
+**待办（下个会话做）**：
+- [ ] **P1-03 治理 `doubao-downloader.user.js` 黑盒**（A/B/C 方案待定）
+
+**变更文件清单**：
+- 新增 `.gitignore`、`.gitattributes`
+- 新增 `docs/archive/README.md`
+- 移动 `background.js.bak` → `docs/archive/background.js.v1.1.0.bak`
+- 修改 `docs/PROJECT_PLAN.md`（P1-02 标完成）
+- 修改 `docs/PROJECT_STATUS.md`（本文件 + 看板 + 下一个任务）
+- 修改 `docs/CHANGELOG.md`（见 #4）
+- 修改 `docs/EXPERIENCE.md`（追加"git 提交规范"，见下）
+
+**新增经验**：
+- `docs/EXPERIENCE.md` 追加「`git commit` message 与内容不匹配时如何修正」最佳实践（soft reset + 重提交）
+- `docs/EXPERIENCE.md` 追加「`.gitattributes` 强制 LF 行尾」最佳实践（Windows 项目必备）
+
+---
+
 ### 会话 #4 · 2026-07-01
 
 **会话目标**：完成 P1-01（持久化 videoList）
@@ -160,7 +193,7 @@
 | 任务 | 状态 | 完成日期 | 备注 |
 |---|---|---|---|
 | P1-01 持久化 videoList | 🟢 已完成 | 2026-07-01 | 内存缓存 + chrome.storage.local + 500 条软上限 + CLEAR_VIDEO_LIST 消息 |
-| P1-02 清理 .bak | ⚪ 未开始 | — | |
+| P1-02 清理 .bak | 🟢 已完成 | 2026-07-01 | 初始化 git 仓库；挪到 docs/archive/；3 次规范提交（.gitignore / v1.2.0 主功能 / .gitattributes） |
 | P1-03 治理 doubao-downloader | ⚪ 未开始 | — | |
 | P1-04 持久化 15s 开关 | ⚪ 未开始 | — | |
 | P1-05 统一错误通知 | ⚪ 未开始 | — | |
@@ -217,27 +250,27 @@
 
 ### 当前正在做
 
-✅ **P1-01 持久化 videoList**（已完成 2026-07-01）
+✅ **P1-02 清理 background.js.bak + 初始化 git 仓库**（已完成 2026-07-01）
 
 ### 下一个该做的
 
-📌 **P1-02：清理 `background.js.bak` 旧版本**
+📌 **P1-03：治理 `doubao-downloader.user.js` 黑盒**
 
 任务描述：
-- 仓库根目录有 `background.js.bak`（385 行）和 `background.js`（新版 234+ 行）
-- `.bak` 是已废弃的旧版本，新人容易误改
-- 建议处理方式：
-  - 选项 A：直接删除（如果 git 历史可查）
-  - 选项 B：移动到 `docs/archive/` 目录归档
-  - 选项 C：纳入 git 提交后通过 `.gitignore` 排除
-- 注意：删除前确认 git/版本控制里能找到
+- `doubao_image/doubao-downloader.user.js` 是 1MB+ 的 Vite 编译产物，调试/改动极其困难
+- 注入方式：`world: "MAIN"`，等于直接执行第三方代码
+- 治理方向（请选择）：
+  - **方案 A（最稳）**：保留 user.js 原样，但在 `tools/` 加 `rebuild-doubao-image.sh`，源码单独放 `doubao_image/src/`，需要改动时重建
+  - **方案 B（彻底）**：找/写一个轻量替代品，从 0 开始
+  - **方案 C（最简）**：本期不动，留作技术债，标记到 P2-08 TS 重构一起做
+- 当前建议：先做方案 A，保留可观测性
 
-参考经验：`docs/EXPERIENCE.md` 中"代码归档"原则
+参考经验：`docs/EXPERIENCE.md` 中"黑盒依赖"处理模式
 
 验收：
-- [ ] `background.js.bak` 不再出现在根目录
-- [ ] 在 CHANGELOG / PROJECT_STATUS 记录清理动作
-- [ ] 现行 `background.js` 功能未受影响（用户已加载的扩展需重新加载）
+- [ ] 选定方案 A/B/C
+- [ ] 在 CHANGELOG / PROJECT_STATUS 记录决定
+- [ ] 现行功能未受影响（用户已加载的扩展需重新加载）
 
 ### 关键文件位置速查
 
