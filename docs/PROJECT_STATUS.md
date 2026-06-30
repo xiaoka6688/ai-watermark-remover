@@ -23,7 +23,7 @@
   - `74cb9cd` chore: 添加 .gitattributes 强制 LF 行尾
 
 **待办（下个会话做）**：
-- [ ] **P1-07 文件命名模板**
+- [ ] **P1-08 Options Page**
 
 **变更文件清单**：
 - 新增 `.gitignore`、`.gitattributes`
@@ -198,7 +198,7 @@
 | P1-04 持久化 15s 开关 | 🟢 已完成 | 2026-07-01 | postMessage 桥接 chrome.storage.local；popup 滑块开关；统一浮窗 |
 | P1-05 统一错误通知 | 🟢 已完成 | 2026-07-01 | notify() 内嵌 background.js；popup toast 实时+启动积压 |
 | P1-06 跨标签去重 | 🟢 已完成 | 2026-07-01 | downloadedUrls Map + TTL 60s；5 个下载入口全部接入 |
-| P1-07 命名模板 | ⚪ 未开始 | — | |
+| P1-07 命名模板 | 🟢 已完成 | 2026-07-01 | formatFilename()；7 个模板变量；5 个入口接入；Options Page 预留 |
 | P1-08 Options Page | ⚪ 未开始 | — | |
 | P1-09 下载进度反馈 | ⚪ 未开始 | — | |
 | P1-10 统一日志 | ⚪ 未开始 | — | |
@@ -250,22 +250,28 @@
 
 ### 当前正在做
 
-✅ **P1-06 跨标签页去重**（已完成 2026-07-01）
+✅ **P1-07 文件命名模板**（已完成 2026-07-01）
 
 ### 下一个该做的
 
-📌 **P1-07：文件命名模板**
+📌 **P1-08：Options Page**
 
 任务描述：
-- 当前下载文件名全是 `xxx_<时间戳>.ext`，整理起来没有意义
-- 支持模板变量：`{site}` / `{title}` / `{date}` / `{idx}` / `{ext}`
-- 在 Options Page（P1-08）里可配置模板
-- 临时方案：先在 `background.js` 里实现模板解析函数
+- 新增 `options.html`，统一管理所有配置项
+- 当前已有的可配置项：
+  - 15s 时长开关（`xq_d15_enabled`）
+  - 文件名模板（`filenameTemplate`）
+  - 下载去重 TTL（`downloadedUrls` 相关）
+- 新增配置项：
+  - 各站点模块开关（dreamina / doubao / qianwen / xyq / jimeng）
+  - 下载目录前缀
+- 在 `manifest.json` 注册 `options_page`
 
 验收：
-- [ ] 下载文件名可读（如 `doubao_可爱猫咪_20260701_01.mp4`）
-- [ ] 模板可在代码中配置（Options Page 配置留到 P1-08）
-- [ ] 现行功能未受影响
+- [ ] chrome://extensions 里点"详情"→"扩展程序选项"能打开
+- [ ] 15s 开关能在 Options Page 切换
+- [ ] 文件名模板能在 Options Page 编辑
+- [ ] 配置修改后实时生效
 
 ### 关键文件位置速查
 

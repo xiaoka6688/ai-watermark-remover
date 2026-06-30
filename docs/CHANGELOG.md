@@ -11,6 +11,13 @@
 
 ### 已完成（本会话）
 
+- [x] **P1-07 文件命名模板**
+  - `background.js` 新增 `formatFilename(data)` 函数
+  - 模板变量：`{site}` / `{title}` / `{date}` / `{time}` / `{idx}` / `{ext}` / `{id}`
+  - 默认模板：`{site}_{date}_{idx}.{ext}`
+  - 5 个下载入口全部改用模板：dreamina / xyq / doubao / qianwen / jimeng
+  - 新增 `GET/SET_FILENAME_TEMPLATE` 消息（给 Options Page 预留接口）
+  - 模板持久化到 `chrome.storage.local`
 - [x] **P1-06 跨标签页去重**
   - `background.js` 新增 `downloadedUrls` Map（URL → 过期时间戳，TTL 60s，上限 200 条）
   - 新增 `isDuplicateDownload(url)` 函数（检查 + 记录 + 自动清理过期条目）

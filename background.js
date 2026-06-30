@@ -118,6 +118,51 @@ function consumeNotifications(callback) {
   });
 }
 
+// ==================== 文件命名模板 ====================
+// 模板变量：{site} {title} {date} {time} {idx} {ext} {id}
+// 默认模板：{site}_{date}_{idx}.{ext}
+const DEFAULT_FILENAME_TEMPLATE = '{site}_{date}_{idx}.{ext}';
+let filenameTemplate = DEFAULT_FILENAME_TEMPLATE;
+
+// 从 storage 加载模板（启动时 + popup 修改后）
+chrome.storage.local.get(['filenameTemplate'], (result) => {
+  if (result.filenameTemplate) filenameTemplate = result.filenameTemplate;
+});
+
+// 计数器（同一次会话内递增，避免同秒冲突）
+let filenameCounter = 0;
+
+function formatFilename(data) {
+  // data: { site, title, ext, id, url }
+  const now = new Date();
+  const date = now.toISOString().slice(0, 10).replace(/-/g, '');
+  const time = now.toISOString().slice(11, 19).replace(/:/g, '');
+  filenameCounter++;
+  const idx = String(filenameCounter).padStart(2, '0');
+
+  const safe = (s) => String(s || '').replace(/[\\/:*?"<>|\s]+/g, '_').replace(/^_+|_+$/g, '').substring(0, 50);
+
+  const vars = {
+    site: safe(data.site) || 'download',
+    title: safe(data.title) || '',
+    date: date,
+    time: time,
+    idx: idx,
+    ext: data.ext || 'mp4',
+    id: safe(data.id) || ''
+  };
+
+  let result = filenameTemplate;
+  for (const [key, val] of Object.entries(vars)) {
+    result = result.replace(new RegExp(`\\{${key}\\}`, 'g'), val);
+  }
+
+  // 清理连续下划线和空标题产生的多余分隔符
+  result = result.replace(/_+/g, '_').replace(/^_|_\.|\.\./g, (m) => m.replace('_', ''));
+
+  return result;
+}
+
 // ==================== 豆包分享API（回退方案） ====================
 
 async function callBigmusicShareSave(messageId) {
@@ -195,7 +240,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       sendResponse({ success: true, skipped: true });
       return true;
     }
-    latestRequestedFilename = message.filename || `dreamina_video_${Date.now()}.mp4`;
+    latestRequestedFilename = message.filename || formatFilename({ site: 'dreamina', title: message.title || '', ext: 'mp4', id: message.videoId || '' });
     latestRequestedTime = Date.now();
     chrome.downloads.download({
       url: message.url,
@@ -219,7 +264,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       return true;
     }
     const dateStr = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-    let filename = `下载_${dateStr}.mp4`;
+    let filename = formatFilename({ site: 'xyq', title: message.title || '', ext: 'mp4' });
     try {
       const urlObj = new URL(url);
       const targetName = urlObj.searchParams.get('filename');
@@ -249,7 +294,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (data?.success && data?.videoUrl) {
       const rawId = data.vid || data.messageId || Date.now();
       const sanitizedId = String(rawId).replace(/[\\/:*?"<>|]/g, '_');
-      const filename = `${sanitizedId}.mp4`;
+      const filename = formatFilename({ site: 'doubao', title: sanitizedId, ext: 'mp4', id: rawId });
       downloadVideo(data.videoUrl, filename, false)
         .then(() => sendResponse({ success: true }))
         .catch(error => {
@@ -324,6 +369,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
 
+  // ---- 文件名模板（popup/Options Page 读写） ----
+  if (message.type === 'GET_FILENAME_TEMPLATE') {
+    sendResponse({ success: true, template: filenameTemplate, default: DEFAULT_FILENAME_TEMPLATE });
+    return true;
+  }
+
+  if (message.type === 'SET_FILENAME_TEMPLATE') {
+    filenameTemplate = message.template || DEFAULT_FILENAME_TEMPLATE;
+    chrome.storage.local.set({ filenameTemplate: filenameTemplate });
+    sendResponse({ success: true });
+    return true;
+  }
+
   // ---- 豆包主动下载（popup 触发） ----
   if (message.type === 'startVideoDownload') {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -354,7 +412,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       sendResponse({ success: true, skipped: true });
       return true;
     }
-    const filename = message.filename || `download_${Date.now()}.mp4`;
+    const filename = message.filename || formatFilename({ site: 'qianwen', title: message.title || '', ext: 'mp4' });
     chrome.downloads.download({
       url: url,
       filename: filename,
@@ -381,7 +439,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           sendResponse({ success: true, skipped: true });
           return;
         }
-        let filename = message.filename || `image_${Date.now()}.jpg`;
+        let filename = message.filename || formatFilename({ site: 'jimeng', title: '', ext: 'png' });
 
         if (url.startsWith('data:')) {
           const response = await fetch(url);
