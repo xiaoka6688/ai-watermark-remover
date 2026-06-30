@@ -6,6 +6,28 @@ let latestRequestedFilename = null;
 let latestRequestedTime = 0;
 const pendingDownloads = new Map();
 
+// ==================== 跨标签页下载去重 ====================
+// 同一 URL 在 TTL 内不重复下载（防多标签页 + 用户连点）
+const downloadedUrls = new Map(); // url → expireAt timestamp
+const DEDUP_TTL = 60 * 1000;      // 60 秒内同 URL 不重复下载
+const DEDUP_MAX_SIZE = 200;       // 最多缓存 200 条
+
+function isDuplicateDownload(url) {
+  if (!url) return false;
+  const now = Date.now();
+  // 清理过期条目（顺便做）
+  if (downloadedUrls.size > DEDUP_MAX_SIZE / 2) {
+    for (const [k, expireAt] of downloadedUrls) {
+      if (expireAt < now) downloadedUrls.delete(k);
+    }
+  }
+  if (downloadedUrls.has(url) && downloadedUrls.get(url) > now) {
+    return true; // 重复！
+  }
+  downloadedUrls.set(url, now + DEDUP_TTL);
+  return false;
+}
+
 // ========== 豆包视频数据持久化 ==========
 // 旧版用 const videoList = [] 存内存，SW 30s 休眠后清空 → popup 统计重置
 // 改为：chrome.storage.local 持久化 + 内存缓存（SW 实例存活期间复用）
@@ -132,6 +154,10 @@ async function callBigmusicShareSave(messageId) {
 // ==================== 下载函数 ====================
 
 async function downloadVideo(url, filename, saveAs = false) {
+  if (isDuplicateDownload(url)) {
+    console.log('[AI去水印] 跳过重复下载:', url.substring(0, 80));
+    return { success: true, skipped: true, filename };
+  }
   pendingDownloads.set(url, filename);
   const downloadId = await chrome.downloads.download({
     url,
@@ -165,6 +191,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   // ---- Dreamina / 即梦 下载 ----
   if (message.action === 'DOWNLOAD') {
+    if (isDuplicateDownload(message.url)) {
+      sendResponse({ success: true, skipped: true });
+      return true;
+    }
     latestRequestedFilename = message.filename || `dreamina_video_${Date.now()}.mp4`;
     latestRequestedTime = Date.now();
     chrome.downloads.download({
@@ -184,6 +214,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   if (message.action === 'download_video') {
     const url = message.url;
+    if (isDuplicateDownload(url)) {
+      sendResponse({ success: true, skipped: true });
+      return true;
+    }
     const dateStr = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
     let filename = `下载_${dateStr}.mp4`;
     try {
@@ -316,6 +350,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   // ---- 千问文件下载（来自 qianwen_content.js） ----
   if (message.type === 'downloadFile') {
     const url = message.url;
+    if (isDuplicateDownload(url)) {
+      sendResponse({ success: true, skipped: true });
+      return true;
+    }
     const filename = message.filename || `download_${Date.now()}.mp4`;
     chrome.downloads.download({
       url: url,
@@ -338,6 +376,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     (async () => {
       try {
         let url = message.url;
+        // base64 URL 不参与去重（每次生成的 blob URL 不同）
+        if (!url.startsWith('data:') && isDuplicateDownload(url)) {
+          sendResponse({ success: true, skipped: true });
+          return;
+        }
         let filename = message.filename || `image_${Date.now()}.jpg`;
 
         if (url.startsWith('data:')) {

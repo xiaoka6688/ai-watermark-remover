@@ -11,6 +11,11 @@
 
 ### 已完成（本会话）
 
+- [x] **P1-06 跨标签页去重**
+  - `background.js` 新增 `downloadedUrls` Map（URL → 过期时间戳，TTL 60s，上限 200 条）
+  - 新增 `isDuplicateDownload(url)` 函数（检查 + 记录 + 自动清理过期条目）
+  - 所有 5 个下载入口接入去重：`downloadVideo` / `DOWNLOAD` / `download_video` / `downloadFile` / `downloadImage`
+  - base64 URL 不参与去重（每次生成的 blob URL 不同）
 - [x] **P1-05 统一错误通知**
   - `background.js` 新增 `notify(level, msg, context)` 函数（写入 `chrome.storage.local`，限 20 条）
   - 新增 `consumeNotifications()` + `CONSUME_NOTIFICATIONS` 消息（popup 读取后清空）

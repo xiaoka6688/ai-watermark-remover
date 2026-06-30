@@ -37,7 +37,7 @@
 | P1-03 | **`doubao-downloader.user.js` 治理** | 🟢 | 2026-07-01 | 0.3d | 方案 A：提取核心 JSON.parse 逻辑写成 ~280 行轻量版 `doubao_image/content.js`；旧版归档 `docs/archive/` |
 | P1-04 | **`duration15.js` 持久化开关** | 🟢 | 2026-07-01 | 0.3d | postMessage 桥接 chrome.storage.local；popup 滑块开关；统一浮窗函数 |
 | P1-05 | **统一错误通知** | 🟢 | 2026-07-01 | 0.3d | `notify()` 内嵌 background.js；popup toast 实时 + 启动积压；关键 catch 块已接入 |
-| P1-06 | **跨标签页去重**：防止 `dreamina` 同一视频下载多次 | ⚪ | - | 0.5d | 用 URL hash 做短期去重 |
+| P1-06 | **跨标签页去重** | 🟢 | 2026-07-01 | 0.2d | `downloadedUrls` Map + TTL 60s；5 个下载入口全部接入；base64 豁免 |
 
 ## 1.2 🟡 体验优化
 
