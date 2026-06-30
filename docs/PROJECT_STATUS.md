@@ -23,7 +23,7 @@
   - `74cb9cd` chore: 添加 .gitattributes 强制 LF 行尾
 
 **待办（下个会话做）**：
-- [ ] **P1-10 统一日志分级**
+- [ ] **P1-11 关键路径单测**
 
 **变更文件清单**：
 - 新增 `.gitignore`、`.gitattributes`
@@ -201,7 +201,7 @@
 | P1-07 命名模板 | 🟢 已完成 | 2026-07-01 | formatFilename()；7 个模板变量；5 个入口接入；Options Page 预留 |
 | P1-08 Options Page | 🟢 已完成 | 2026-07-01 | options.html+js；站点开关/15s/去重/命名模板/数据管理 |
 | P1-09 下载进度反馈 | 🟢 已完成 | 2026-07-01 | downloads.onChanged；broadcastProgress 500ms 节流；forwarder+dreamina 按钮百分比 |
-| P1-10 统一日志 | ⚪ 未开始 | — | |
+| P1-10 统一日志 | 🟢 已完成 | 2026-07-01 | 11 个文件前缀统一为 [AI去水印·模块名] |
 | P1-11 关键路径单测 | ⚪ 未开始 | — | |
 | P1-12 CSP 检查 | ⚪ 未开始 | — | |
 
@@ -250,20 +250,25 @@
 
 ### 当前正在做
 
-✅ **P1-09 下载进度反馈**（已完成 2026-07-01）
+✅ **P1-10 统一日志分级**（已完成 2026-07-01）
 
 ### 下一个该做的
 
-📌 **P1-10：统一日志分级**
+📌 **P1-11：关键路径单测**
 
 任务描述：
-- 当前各模块日志前缀不统一：`[小柒15s]` / `[AI去水印]` / `[Dreamina Logger]` / `[content]` 等
-- 统一为 `[AI去水印·模块名]` 格式
-- 封装 `logger.debug/info/warn/error` 函数，支持级别过滤
+- 拦截逻辑（递归遍历 JSON、SSE 解析、URL 改写）都适合加 Jest 单测
+- 核心测试点：
+  - `formatFilename()` 模板解析
+  - `isDuplicateDownload()` 去重逻辑
+  - `findAllKeysInJson()` 递归搜索
+  - `extractFromCreations()` 豆包图片提取
+  - `patchBody()` 15s 时长改写
+- 引入 Jest（或 Vitest）+ 创建 `tests/` 目录
 
 验收：
-- [ ] 所有模块日志前缀统一
-- [ ] 控制台可通过级别过滤
+- [ ] 至少 5 个核心函数有单测覆盖
+- [ ] `npm test` 或 `npx jest` 能跑通
 - [ ] 现行功能未受影响
 
 ### 关键文件位置速查

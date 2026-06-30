@@ -7,7 +7,7 @@
 (function() {
   'use strict';
 
-  console.log('[XQ 即梦助手] 脚本启动 v1.0');
+  console.log('[AI去水印·即梦图片] 脚本启动 v1.0');
 
   // ========================= 全局数据 =========================
   let imageList = [];
@@ -71,7 +71,7 @@
         img.src = URL.createObjectURL(blob);
       });
     } catch (error) {
-      console.error('[XQ 即梦] 去除水印失败:', error);
+      console.error('[AI去水印·即梦图片] 去除水印失败:', error);
       throw error;
     }
   }
@@ -233,7 +233,7 @@
           throw new Error(response?.error || '下载失败');
         }
       } catch (error) {
-        console.error('[XQ 即梦] 下载错误:', error);
+        console.error('[AI去水印·即梦图片] 下载错误:', error);
         showToast('❌ ' + (error.message || '下载失败'), true);
         btn.innerHTML = '❌ 重试';
         btn.style.background = '#e74c3c';
@@ -263,7 +263,7 @@
       added++;
     }
     if (added > 0) {
-      console.log('[XQ 即梦] 新增按钮:', added);
+      console.log('[AI去水印·即梦图片] 新增按钮:', added);
       updateFloatingPanelUI();
     }
   }
@@ -401,7 +401,7 @@
 
   // ========== 初始化 ==========
   function init() {
-    console.log('[XQ 即梦] 插件启动');
+    console.log('[AI去水印·即梦图片] 插件启动');
 
     // 注入一些通用样式
     const style = document.createElement('style');

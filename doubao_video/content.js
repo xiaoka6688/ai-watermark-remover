@@ -45,7 +45,7 @@ async function callGetPlayInfo(videoKey) {
   const originalMedia = data.original_media_info;
   if (!originalMedia || !originalMedia.main_url) {
     // 回退到 play_infos
-    console.warn('[content] 未找到 original_media_info，尝试使用 play_infos');
+    console.warn('[AI去水印·豆包视频] 未找到 original_media_info，尝试使用 play_infos');
     const playInfos = data.play_infos || (data.play_info ? [data.play_info] : []);
     const playInfo = playInfos[0];
     if (!playInfo || !playInfo.main) {
@@ -229,7 +229,7 @@ function extractNoWatermarkVideoUrl(data) {
 
 // ========== 下载视频入口（优先新接口 get_play_info） ==========
 async function startVideoDownload() {
-  console.log('[content.js] startVideoDownload');
+  console.log('[AI去水印·豆包视频] startVideoDownload');
   var info = findVideoAndMessageId();
   if (!info) return { success: false, error: '未找到视频内容' };
 
@@ -250,7 +250,7 @@ async function startVideoDownload() {
       };
     }
   } catch (err) {
-    console.warn('[content.js] 新接口失败，回退旧逻辑:', err);
+    console.warn('[AI去水印·豆包视频] 新接口失败，回退旧逻辑:', err);
   }
 
   // 2. 回退原有逻辑
@@ -278,7 +278,7 @@ async function startVideoDownload() {
 }
 
 async function startVideoDownloadByMessageId(messageId) {
-  console.log('[content.js] startVideoDownloadByMessageId, messageId:', messageId);
+  console.log('[AI去水印·豆包视频] startVideoDownloadByMessageId, messageId:', messageId);
   var info = findVidByMessageId(messageId);
   if (!info) return { success: false, error: '未找到视频内容', messageId: messageId };
 
@@ -299,7 +299,7 @@ async function startVideoDownloadByMessageId(messageId) {
       };
     }
   } catch (err) {
-    console.warn('[content.js] 新接口失败，回退旧逻辑:', err);
+    console.warn('[AI去水印·豆包视频] 新接口失败，回退旧逻辑:', err);
   }
 
   // 2. 回退旧逻辑
@@ -528,4 +528,4 @@ window.addEventListener('replaceState', handleRouteChange);
 setTimeout(function() { scanInitialVideoData(); }, 500);
 setTimeout(function() { scanInitialVideoData(); }, 1500);
 
-console.log('[content.js] 豆包视频下载 content script 已加载');
+console.log('[AI去水印·豆包视频] 豆包视频下载 content script 已加载');

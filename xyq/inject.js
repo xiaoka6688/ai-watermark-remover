@@ -7,7 +7,7 @@
 (function () {
     'use strict';
 
-    const LOG_PREFIX = '[小云雀下载·inject]';
+    const LOG_PREFIX = '[AI去水印·小云雀·inject]';
     const CARD_SELECTOR = 'button[class*="card-"]';
 
     // ===== 性能缓存 =====

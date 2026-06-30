@@ -8,7 +8,7 @@
 (function () {
     'use strict';
 
-    const LOG_PREFIX = '[小云雀下载]';
+    const LOG_PREFIX = '[AI去水印·小云雀]';
     const CARD_SELECTOR = 'button[class*="card-"]';
     const PREVIEW_SELECTOR = 'div[class*="cardPreview-"]';
 

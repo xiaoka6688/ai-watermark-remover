@@ -10,7 +10,7 @@ const isSupportedHost = SUPPORTED_HOSTNAMES.has(window.location.hostname);
 const CARD_SELECTOR = '[data-testid*="asset"], [data-testid*="work"], a[href*="/ai-tool/"], li, article';
 
 if (!isSupportedHost) {
-    console.debug('[Dreamina Downloader] Skip unsupported host:', window.location.hostname);
+    console.debug('[AI去水印·Dreamina] Skip unsupported host:', window.location.hostname);
 }
 
 window.addEventListener('message', function(event) {
@@ -57,10 +57,10 @@ function startObserver() {
     
     try {
         observer.observe(target, { childList: true, subtree: true });
-        console.log("[Dreamina Downloader] Content Script: Observer started.");
+        console.log("[AI去水印·Dreamina] Content Script: Observer started.");
         setTimeout(injectButtons, 2000);
     } catch (e) {
-        console.error("[Dreamina Downloader] Content Script: Failed to start observer:", e);
+        console.error("[AI去水印·Dreamina] Content Script: Failed to start observer:", e);
     }
 }
 
@@ -174,7 +174,7 @@ function checkAndInjectBySrc(element, src, fallbackContainer) {
         const rect = element.getBoundingClientRect();
         if (rect.width > 250 || rect.height > 250) {
             matchData = latestInterceptedVideo;
-            console.debug('[Dreamina Downloader] Using latest intercepted video as fallback for large player');
+            console.debug('[AI去水印·Dreamina] Using latest intercepted video as fallback for large player');
         }
     }
 

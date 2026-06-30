@@ -14,7 +14,7 @@
   }
 
   window.__dreaminaDownloaderInterceptorInstalled = true;
-  console.log("[Dreamina Logger] Interceptor is priming...");
+  console.log("[AI去水印·Dreamina] Interceptor is priming...");
 
   const originalFetch = window.fetch;
   const extractRequestUrl = (requestLike) => {
@@ -69,7 +69,7 @@
     proxiedFetch.toString = () => "function fetch() { [native code] }";
     window.fetch = proxiedFetch;
   } catch(e) {
-    console.error("[Dreamina Logger] Failed to proxy fetch safely:", e);
+    console.error("[AI去水印·Dreamina] Failed to proxy fetch safely:", e);
     window.fetch = proxiedFetch;
   }
 
@@ -241,5 +241,5 @@
     return collected;
   }
 
-  console.log("[Dreamina Logger] API Interceptor Ready.");
+  console.log("[AI去水印·Dreamina] API Interceptor Ready.");
 })();

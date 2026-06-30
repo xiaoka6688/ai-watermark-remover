@@ -6,7 +6,7 @@
 (function() {
   'use strict';
 
-  console.log('[小柒千问助手] 脚本启动 v1.0');
+  console.log('[AI去水印·千问] 脚本启动 v1.0');
 
   // ========================= 全局数据 =========================
   if (!window.__XQ_QW_DATA__) {
@@ -286,7 +286,7 @@
     }, 2000);
 
     startObserver();
-    console.log('[小柒千问助手] 初始化完成');
+    console.log('[AI去水印·千问] 初始化完成');
   }
 
   if (document.readyState === 'loading') {

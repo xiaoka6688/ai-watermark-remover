@@ -368,4 +368,4 @@ if (document.readyState === 'loading') {
   init();
 }
 
-console.log('[Doubao DL] forwarder.js (新版) 已加载');
+console.log('[AI去水印·豆包视频] forwarder.js (新版) 已加载');

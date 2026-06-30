@@ -11,6 +11,10 @@
 
 ### 已完成（本会话）
 
+- [x] **P1-10 统一日志分级**
+  - 所有模块日志前缀统一为 `[AI去水印·模块名]` 格式
+  - 模块映射：background / 豆包视频 / Dreamina / 即梦图片 / 千问 / 小云雀 / 豆包图片 / 15s
+  - 涉及 11 个文件，全部语法校验通过
 - [x] **P1-09 下载进度反馈**
   - `background.js` 新增 `chrome.downloads.onChanged` 监听器
   - `activeDownloads` Map 跟踪活跃下载（id → percent/totalBytes）
