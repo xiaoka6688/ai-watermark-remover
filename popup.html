@@ -59,6 +59,16 @@
     <span class="stat-value" id="videoCount">-</span>
     <span class="stat-label">豆包已捕获视频</span>
   </div>
+  <div class="card" style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;">
+    <div>
+      <div style="font-size:13px;font-weight:600;">豆包 15s 时长扩展</div>
+      <div style="font-size:11px;color:#64748b;">开启后视频生成页多出 15s 选项</div>
+    </div>
+    <label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer;">
+      <input type="checkbox" id="toggle15s" style="opacity:0;width:0;height:0;">
+      <span id="toggle15sSlider" style="position:absolute;top:0;left:0;right:0;bottom:0;background:#cbd5e1;border-radius:24px;transition:0.3s;"></span>
+    </label>
+  </div>
   <div class="card muted" style="font-size:12px; line-height:1.7;">
     <strong>使用说明：</strong><br>
     <strong>Dreamina/即梦：</strong> 打开 dreamina.capcut.com 或 jimeng.jianying.com，视频右下角出现下载按钮。<br><br>
@@ -73,6 +83,7 @@
   <button class="btn" id="refreshBtn">刷新统计</button>
   <button class="btn" id="clearBtn" style="background:#ef4444;margin-left:6px;">清空数据</button>
   <script>
+    // ========== 豆包视频统计 ==========
     function refreshVideoCount() {
       chrome.runtime.sendMessage({type: 'GET_VIDEO_LIST'}, (resp) => {
         const count = resp?.data?.length || 0;
@@ -89,6 +100,37 @@
         }
       });
     });
+
+    // ========== 15s 时长开关 ==========
+    const toggle15s = document.getElementById('toggle15s');
+    const slider15s = document.getElementById('toggle15sSlider');
+
+    function updateToggleUI(enabled) {
+      toggle15s.checked = enabled;
+      slider15s.style.background = enabled ? '#2563eb' : '#cbd5e1';
+      slider15s.innerHTML = enabled
+        ? '<span style="position:absolute;height:18px;width:18px;left:24px;bottom:3px;background:#fff;border-radius:50%;transition:0.3s;"></span>'
+        : '<span style="position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:0.3s;"></span>';
+    }
+
+    chrome.runtime.sendMessage({type: 'GET_15S_STATE'}, (resp) => {
+      if (resp?.success) updateToggleUI(resp.enabled);
+    });
+
+    toggle15s.addEventListener('change', () => {
+      const newVal = toggle15s.checked;
+      chrome.runtime.sendMessage({type: 'SET_15S_ENABLED', value: newVal}, (resp) => {
+        if (resp?.success) {
+          updateToggleUI(newVal);
+          const tip = document.createElement('div');
+          tip.style.cssText = 'position:fixed;top:10px;left:50%;transform:translateX(-50%);background:#2563eb;color:#fff;padding:6px 16px;border-radius:8px;font-size:12px;z-index:999;';
+          tip.textContent = newVal ? '✅ 已启用，请刷新豆包页面' : '🔴 已关闭，请刷新豆包页面';
+          document.body.appendChild(tip);
+          setTimeout(() => tip.remove(), 2000);
+        }
+      });
+    });
+
     // 自动加载
     refreshVideoCount();
   </script>

@@ -35,7 +35,7 @@
 | P1-01 | **持久化 `videoList` 到 `chrome.storage.local`** | 🟢 | 2026-07-01 | 0.5d | 内存缓存 + 并发保护 + 500 条 FIFO 软上限；新增 `CLEAR_VIDEO_LIST` 消息；popup 加清空按钮 |
 | P1-02 | **清理 `background.js.bak` 旧版** | 🟢 | 2026-07-01 | 0.1d | 初始化 git 仓库（main 分支 + xiaoka6688 身份）；挪到 `docs/archive/background.js.v1.1.0.bak`；写归档 README；3 次规范提交 |
 | P1-03 | **`doubao-downloader.user.js` 治理** | 🟢 | 2026-07-01 | 0.3d | 方案 A：提取核心 JSON.parse 逻辑写成 ~280 行轻量版 `doubao_image/content.js`；旧版归档 `docs/archive/` |
-| P1-04 | **`duration15.js` 持久化开关**（`chrome.storage.sync`） | ⚪ | - | 0.5d | 关闭后不需刷新即生效 |
+| P1-04 | **`duration15.js` 持久化开关** | 🟢 | 2026-07-01 | 0.3d | postMessage 桥接 chrome.storage.local；popup 滑块开关；统一浮窗函数 |
 | P1-05 | **统一错误通知**（`notify(level, msg)` 封装） | ⚪ | - | 0.5d | 所有 catch 块调用统一入口，popup toast 可见 |
 | P1-06 | **跨标签页去重**：防止 `dreamina` 同一视频下载多次 | ⚪ | - | 0.5d | 用 URL hash 做短期去重 |
 

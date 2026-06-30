@@ -225,6 +225,25 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
 
+  // ---- 15s 时长扩展状态（popup 读写） ----
+  if (message.type === 'GET_15S_STATE') {
+    chrome.storage.local.get(['xq_d15_enabled', 'codex_doubao_video_duration_choice'], (result) => {
+      sendResponse({
+        success: true,
+        enabled: result.xq_d15_enabled === true,
+        duration: Number(result.codex_doubao_video_duration_choice) || 0
+      });
+    });
+    return true;
+  }
+
+  if (message.type === 'SET_15S_ENABLED') {
+    chrome.storage.local.set({ xq_d15_enabled: message.value === true }, () => {
+      sendResponse({ success: true });
+    });
+    return true;
+  }
+
   // ---- 豆包主动下载（popup 触发） ----
   if (message.type === 'startVideoDownload') {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {

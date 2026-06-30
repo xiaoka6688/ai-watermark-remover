@@ -11,6 +11,12 @@
 
 ### 已完成（本会话）
 
+- [x] **P1-04 持久化 15s 浮窗开关**
+  - `duration15.js` 从 `localStorage` 改为 postMessage 桥接 → `forwarder.js` → `chrome.storage.local`
+  - `forwarder.js` 新增 3 个桥接消息：`xq_d15_get_state` / `xq_d15_set_enabled` / `xq_d15_set_duration`
+  - `background.js` 新增 `GET_15S_STATE` / `SET_15S_ENABLED` 消息（popup 专用）
+  - `popup.html` 新增 15s 开关滑块（含启用/关闭状态实时同步 + 提示 toast）
+  - 统一浮窗：旧的 off/on 两个浮窗合并为 `createFloater(isOn)` 一个函数
 - [x] **P1-03 治理 `doubao-downloader.user.js` 黑盒**（方案 A）
   - 原版 22,880 行 1MB+ Vite 编译产物 → 轻量版 ~280 行 `doubao_image/content.js`
   - 保留核心机制：`JSON.parse` 猴子补丁拦截 `creations` 响应

@@ -23,7 +23,7 @@
   - `74cb9cd` chore: 添加 .gitattributes 强制 LF 行尾
 
 **待办（下个会话做）**：
-- [ ] **P1-04 持久化 15s 浮窗开关**
+- [ ] **P1-05 统一错误通知**
 
 **变更文件清单**：
 - 新增 `.gitignore`、`.gitattributes`
@@ -195,7 +195,7 @@
 | P1-01 持久化 videoList | 🟢 已完成 | 2026-07-01 | 内存缓存 + chrome.storage.local + 500 条软上限 + CLEAR_VIDEO_LIST 消息 |
 | P1-02 清理 .bak | 🟢 已完成 | 2026-07-01 | 初始化 git 仓库；挪到 docs/archive/；3 次规范提交（.gitignore / v1.2.0 主功能 / .gitattributes） |
 | P1-03 治理 doubao-downloader | 🟢 已完成 | 2026-07-01 | 22880 行 → ~280 行轻量版；JSON.parse 拦截保留；旧版归档 docs/archive/ |
-| P1-04 持久化 15s 开关 | ⚪ 未开始 | — | |
+| P1-04 持久化 15s 开关 | 🟢 已完成 | 2026-07-01 | postMessage 桥接 chrome.storage.local；popup 滑块开关；统一浮窗 |
 | P1-05 统一错误通知 | ⚪ 未开始 | — | |
 | P1-06 跨标签去重 | ⚪ 未开始 | — | |
 | P1-07 命名模板 | ⚪ 未开始 | — | |
@@ -250,21 +250,21 @@
 
 ### 当前正在做
 
-✅ **P1-03 治理 doubao-downloader.user.js**（已完成 2026-07-01）
+✅ **P1-04 持久化 15s 浮窗开关**（已完成 2026-07-01）
 
 ### 下一个该做的
 
-📌 **P1-04：持久化 15s 浮窗开关（`doubao_video/duration15.js`）**
+📌 **P1-05：统一错误通知**
 
 任务描述：
-- `duration15.js` 的 15s 时长开关默认关闭，需要点击右下角浮窗启用 → 刷新页面才生效
-- 当前状态存 `localStorage.getItem('xq_d15_enabled')`，仅页面级
-- 改为：`chrome.storage.sync`（跨设备同步）+ `chrome.storage.local`（本机持久化）
-- 增加 popup 内开关（不依赖浮窗）
+- 当前所有 catch 块都用 `console.error`，用户在 popup 里看不到任何错误提示
+- 需要统一封装 `notify(level, msg)` 函数
+- popup 顶部用 toast 显示错误/成功信息
+- SW 侧的错误通过 `chrome.runtime.sendMessage` 转发到 popup
 
 验收：
-- [ ] 关闭浏览器后再开，15s 开关状态仍在
-- [ ] popup.html 中有 15s 开关
+- [ ] 所有 catch 块调用统一 `notify` 入口
+- [ ] popup 能看到下载失败/成功的 toast 提示
 - [ ] 现行功能未受影响
 
 ### 关键文件位置速查

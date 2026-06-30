@@ -1,79 +1,71 @@
 // ================================================================
-//  小柒去水印插件 - 15s 豆包视频时长扩展
-//  右下角浮窗控制启停，启用时注入拦截，不启用时什么都不做
+//  AI去水印 - 15s 豆包视频时长扩展 (v1.2.0 持久化版)
+//  改为通过 postMessage 桥接 forwarder.js → chrome.storage.local
 // ================================================================
 (function () {
   'use strict';
 
-  const LS_KEY = 'xq_d15_enabled';
   const TARGET_DURATION = 15;
   const TARGET_MODEL = 'seedance_v2.0';
-  const STORAGE_KEY = 'codex_doubao_video_duration_choice';
 
-  // ========== 读取启用状态（默认关闭） ==========
-  function isEnabled() {
-    return localStorage.getItem(LS_KEY) === 'true';
+  // ==================== 存储（通过 ISOLATED world 桥接） ====================
+  // chrome.storage.local 的 key
+  const STORAGE_ENABLED_KEY = 'xq_d15_enabled';
+  const STORAGE_DURATION_KEY = 'codex_doubao_video_duration_choice';
+
+  // 本地状态（先用默认值，等 forwarder 回传真实值）
+  let enabled = false;
+  let selectedDuration = 0;
+  let initialized = false;
+
+  // 向 forwarder.js 请求存储状态
+  function requestStateFromStorage() {
+    window.postMessage({ type: 'xq_d15_get_state' }, '*');
   }
 
-  function setEnabled(val) {
-    localStorage.setItem(LS_KEY, val ? 'true' : 'false');
+  // 保存状态到 storage（通过 forwarder.js 桥接）
+  function saveEnabledToStorage(val) {
+    enabled = val;
+    window.postMessage({ type: 'xq_d15_set_enabled', value: val }, '*');
   }
+
+  function saveDurationToStorage(seconds) {
+    selectedDuration = seconds;
+    window.postMessage({ type: 'xq_d15_set_duration', value: seconds }, '*');
+  }
+
+  // 监听 forwarder.js 返回的状态
+  window.addEventListener('message', function (event) {
+    if (event.source !== window || !event.data) return;
+    if (event.data.type === 'xq_d15_state_result') {
+      const data = event.data.data || {};
+      enabled = data.enabled === true;
+      selectedDuration = Number(data.duration) || 0;
+      initialized = true;
+      console.log('[AI去水印·15s] 从 storage 恢复状态:', { enabled, selectedDuration });
+      onStateReady();
+    }
+  });
 
   // ========== 不启用时：仅显示浮窗，什么都不做 ==========
-  if (!isEnabled()) {
-    console.log('[小柒15s] ⏸ 已关闭，不注入任何功能');
-
-    function createOffFloater() {
-      const el = document.createElement('div');
-      el.id = 'xq-d15-floater';
-      el.innerHTML = '<span>15s</span>';
-      Object.assign(el.style, {
-        position: 'fixed', bottom: '24px', right: '24px', zIndex: '2147483647',
-        background: 'rgba(100,100,110,0.5)', backdropFilter: 'blur(8px)',
-        border: '1px solid rgba(255,255,255,0.08)',
-        borderRadius: '30px', padding: '8px 14px', cursor: 'pointer',
-        fontFamily: '-apple-system, sans-serif', fontSize: '13px', fontWeight: '700',
-        color: 'rgba(255,255,255,0.5)', userSelect: 'none',
-        boxShadow: '0 2px 12px rgba(0,0,0,0.15)', transition: '0.2s'
-      });
-      el.title = '15s 时长扩展 (已关闭，点击启用)';
-      el.addEventListener('click', () => {
-        setEnabled(true);
-        el.textContent = '🔄 请刷新页面';
-        el.style.color = '#60a5fa';
-        setTimeout(() => location.reload(), 1500);
-      });
-      el.addEventListener('mouseenter', () => { el.style.opacity = '0.8'; });
-      el.addEventListener('mouseleave', () => { el.style.opacity = '1'; });
-
-      const waitBody = () => {
-        if (document.body) { document.body.appendChild(el); }
-        else { setTimeout(waitBody, 200); }
-      };
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', waitBody);
-      } else { waitBody(); }
+  // 等 forwarder.js 回传状态后再决定是否注入功能
+  function onStateReady() {
+    if (!enabled) {
+      console.log('[AI去水印·15s] ⏸ 已关闭，不注入任何功能');
+      createFloater(false); // 灰色浮窗，点击启用
+      return;
     }
 
-    createOffFloater();
-    return; // 退出脚本，什么都不注入
+    console.log('[AI去水印·15s] ✅ 已启用，注入拦截功能');
+    createFloater(true); // 绿色浮窗，点击关闭
+    startInterception();
   }
 
-  // ================================================================
-  //  以下代码仅在启用时执行
-  // ================================================================
-  console.log('[小柒15s] ✅ 已启用，注入拦截功能');
+  // 启动：向 forwarder.js 请求存储状态
+  requestStateFromStorage();
 
-  // ==================== 存储 ====================
-  function selectedDuration() {
-    try { return Number(localStorage.getItem(STORAGE_KEY)) || 0; } catch (_) { return 0; }
-  }
-  function saveDuration(seconds) {
-    try {
-      if (seconds) localStorage.setItem(STORAGE_KEY, String(seconds));
-      else localStorage.removeItem(STORAGE_KEY);
-    } catch (_) {}
-  }
+  // 以下代码在 enabled 状态确定后由 onStateReady → startInterception 调用
+  // patchFetch / patchXhr 在 IIFE 顶层无条件执行（它们内部检查 selectedDuration）
 
   // ==================== 请求拦截 ====================
   function isCompletionUrl(input) {
@@ -96,7 +88,7 @@
 
   function patchBody(rawBody) {
     if (typeof rawBody !== 'string' || !rawBody.trim()) return { changed: false, body: rawBody };
-    if (selectedDuration() !== TARGET_DURATION) return { changed: false, body: rawBody };
+    if (selectedDuration !== TARGET_DURATION) return { changed: false, body: rawBody };
 
     let payload;
     try { payload = JSON.parse(rawBody); } catch (_) { return { changed: false, body: rawBody }; }
@@ -215,7 +207,7 @@
       newItem.addEventListener('click', (e) => {
         e.stopPropagation();
         e.preventDefault();
-        saveDuration(TARGET_DURATION);
+        saveDurationToStorage(TARGET_DURATION);
         const trigger = findDurationTrigger();
         if (trigger) trigger.textContent = trigger.textContent.replace(/\d+\s*s/i, '15s');
         setTimeout(() => document.body.click(), 30);
@@ -228,35 +220,45 @@
     const trigger = findDurationTrigger();
     if (trigger && !trigger.hasAttribute('data-15s-monitored')) {
       trigger.setAttribute('data-15s-monitored', 'true');
-      if (selectedDuration() === TARGET_DURATION) {
+      if (selectedDuration === TARGET_DURATION) {
         setTimeout(() => { trigger.textContent = trigger.textContent.replace(/\d+\s*s/i, '15s'); }, 500);
       }
     }
   }
 
-  // ==================== 右下角浮窗 ====================
-  function createOnFloater() {
+  // ==================== 统一浮窗（启用/关闭两用） ====================
+  function createFloater(isOn) {
     const el = document.createElement('div');
     el.id = 'xq-d15-floater';
-    el.innerHTML = '<span>🟢 15s</span>';
-    Object.assign(el.style, {
+    el.innerHTML = isOn ? '<span>🟢 15s</span>' : '<span>15s</span>';
+
+    const baseStyle = {
       position: 'fixed', bottom: '24px', right: '24px', zIndex: '2147483647',
-      background: 'rgba(30,30,40,0.9)', backdropFilter: 'blur(10px)',
-      border: '1px solid rgba(255,255,255,0.1)',
       borderRadius: '30px', padding: '8px 16px', cursor: 'pointer',
       fontFamily: '-apple-system, sans-serif', fontSize: '13px', fontWeight: '700',
-      color: '#ffffff', userSelect: 'none',
-      boxShadow: '0 2px 16px rgba(0,0,0,0.25)', transition: '0.2s'
-    });
-    el.title = '15s 时长扩展 (已启用，点击关闭)';
+      userSelect: 'none', transition: '0.2s'
+    };
+    const onStyle = {
+      background: 'rgba(30,30,40,0.9)', backdropFilter: 'blur(10px)',
+      border: '1px solid rgba(255,255,255,0.1)', color: '#ffffff',
+      boxShadow: '0 2px 16px rgba(0,0,0,0.25)'
+    };
+    const offStyle = {
+      background: 'rgba(100,100,110,0.5)', backdropFilter: 'blur(8px)',
+      border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)',
+      boxShadow: '0 2px 12px rgba(0,0,0,0.15)'
+    };
+    Object.assign(el.style, baseStyle, isOn ? onStyle : offStyle);
+    el.title = isOn ? '15s 时长扩展 (已启用，点击关闭)' : '15s 时长扩展 (已关闭，点击启用)';
+
     el.addEventListener('click', () => {
-      setEnabled(false);
-      el.innerHTML = '🔴 请刷新页面';
-      el.style.color = '#f87171';
+      saveEnabledToStorage(!isOn);
+      el.innerHTML = isOn ? '🔴 请刷新页面' : '🔄 请刷新页面';
+      el.style.color = isOn ? '#f87171' : '#60a5fa';
       setTimeout(() => location.reload(), 1500);
     });
-    el.addEventListener('mouseenter', () => { el.style.transform = 'scale(1.05)'; });
-    el.addEventListener('mouseleave', () => { el.style.transform = 'scale(1)'; });
+    el.addEventListener('mouseenter', () => { el.style.opacity = '0.8'; el.style.transform = 'scale(1.05)'; });
+    el.addEventListener('mouseleave', () => { el.style.opacity = '1'; el.style.transform = 'scale(1)'; });
 
     const waitBody = () => {
       if (document.body) document.body.appendChild(el);
@@ -266,12 +268,12 @@
     else waitBody();
   }
 
-  // ==================== 启动（及时 patch + 延迟 UI） ====================
+  // ==================== 启动（及时 patch，不受开关影响） ====================
   patchFetch();
   patchXhr();
 
+  // UI + 菜单注入（仅在 onStateReady 确认 enabled 后调用）
   function startUI() {
-    createOnFloater();
     setupMenuInjection();
     markDurationTrigger();
 
@@ -282,9 +284,15 @@
     observer.observe(document.body, { childList: true, subtree: true, characterData: true });
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', startUI, { once: true });
-  } else {
-    startUI();
+  // startInterception 由 onStateReady 调用
+  function startInterception() {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', startUI, { once: true });
+    } else {
+      startUI();
+    }
   }
+
+  // 向 forwarder.js 请求存储状态（已在顶部调用，此处为注释说明）
+  // requestStateFromStorage() → forwarder 回传 → onStateReady() → startInterception()
 })();

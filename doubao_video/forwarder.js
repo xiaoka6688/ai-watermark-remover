@@ -265,6 +265,31 @@ window.addEventListener('message', (event) => {
     setTimeout(scanAndInjectVideos, 1000);
     setTimeout(scanAndInjectVideos, 2500);
   }
+
+  // ========== 15s 时长扩展桥接（MAIN world ↔ chrome.storage） ==========
+  if (msg.type === 'xq_d15_get_state') {
+    chrome.storage.local.get(['xq_d15_enabled', 'codex_doubao_video_duration_choice'], (result) => {
+      window.postMessage({
+        type: 'xq_d15_state_result',
+        data: {
+          enabled: result.xq_d15_enabled === true,
+          duration: Number(result.codex_doubao_video_duration_choice) || 0
+        }
+      }, '*');
+    });
+  }
+
+  if (msg.type === 'xq_d15_set_enabled') {
+    chrome.storage.local.set({ xq_d15_enabled: msg.value === true });
+  }
+
+  if (msg.type === 'xq_d15_set_duration') {
+    if (msg.value) {
+      chrome.storage.local.set({ codex_doubao_video_duration_choice: String(msg.value) });
+    } else {
+      chrome.storage.local.remove('codex_doubao_video_duration_choice');
+    }
+  }
 });
 
 // 来自 background.js 的消息
