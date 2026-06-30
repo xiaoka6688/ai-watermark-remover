@@ -1,0 +1,75 @@
+/* 极简下载按钮 */
+.dreamina-dl-btn {
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  z-index: 2147483647; /* 保证在最顶层 */
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #ffffff;
+  cursor: pointer;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
+  transition: opacity 0.18s ease, transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  opacity: 0;
+  transform: translateY(6px) scale(0.96);
+  pointer-events: none; /* 隐藏时不可点击 */
+}
+
+/* JS 控制的显示状态 */
+.dreamina-dl-btn.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.dreamina-dl-btn.is-visible:hover {
+  border-color: rgba(255, 255, 255, 0.36);
+  background: rgba(255, 255, 255, 0.24);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+  transform: translateY(-1px) scale(1.02);
+}
+
+.dreamina-dl-btn.is-visible:active {
+  transform: translateY(0) scale(0.97);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.dreamina-dl-btn svg {
+  transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+.dreamina-dl-btn:hover svg {
+  transform: translateY(1px);
+}
+
+.dreamina-dl-btn.is-busy {
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.24);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+}
+
+.dreamina-dl-btn.is-busy svg {
+  animation: dreamina-dl-pulse 1s ease-in-out infinite;
+}
+
+@keyframes dreamina-dl-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  50% {
+    opacity: 0.7;
+    transform: translateY(1px);
+  }
+}

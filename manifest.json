@@ -1,0 +1,122 @@
+{
+  "manifest_version": 3,
+  "name": "AI去水印",
+  "version": "1.2.0",
+  "description": "AI去水印，整合 Dreamina / 即梦 视频&图片 / 豆包 图片&视频 / 千问 图片&视频无水印下载 + 豆包视频15秒时长扩展。",
+  "permissions": [
+    "downloads",
+    "activeTab",
+    "tabs",
+    "contextMenus",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://dreamina.capcut.com/*",
+    "https://jimeng.jianying.com/*",
+    "https://dreamina-api.us.capcut.com/*",
+    "https://mweb-api-sg.capcut.com/*",
+    "https://*.tiktokcdn-us.com/*",
+    "https://www.doubao.com/*",
+    "https://*.doubao.com/*",
+    "https://api-normal.doubao.com/*",
+    "*://xyq.jianying.com/*",
+    "*://*.365yg.com/*",
+    "*://*.douyinpic.com/*",
+    "https://www.qianwen.com/*",
+    "https://*.byteimg.com/*",
+    "https://*.bytescm.com/*",
+    "https://*.bytedance.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "AI去水印",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "logo.png",
+      "32": "logo.png",
+      "48": "logo.png",
+      "128": "logo.png"
+    }
+  },
+  "icons": {
+    "16": "logo.png",
+    "32": "logo.png",
+    "48": "logo.png",
+    "128": "logo.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://dreamina.capcut.com/*",
+        "https://jimeng.jianying.com/*"
+      ],
+      "js": ["dreamina/content.js"],
+      "css": ["dreamina/content.css"],
+      "run_at": "document_start"
+    },
+    {
+      "matches": [
+        "https://dreamina.capcut.com/*",
+        "https://jimeng.jianying.com/*"
+      ],
+      "js": ["dreamina/interceptor.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": ["https://www.doubao.com/*"],
+      "js": ["doubao_video/content.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": ["https://www.doubao.com/*"],
+      "js": ["doubao_video/forwarder.js"],
+      "run_at": "document_start"
+    },
+    {
+      "matches": ["https://www.doubao.com/*"],
+      "js": ["doubao_image/doubao-downloader.user.js"],
+      "run_at": "document_end",
+      "world": "MAIN"
+    },
+    {
+      "matches": ["https://www.doubao.com/*"],
+      "js": ["doubao_video/duration15.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": ["*://xyq.jianying.com/*"],
+      "js": ["xyq/jszip.min.js", "xyq/content.js"],
+      "css": ["xyq/style.css"],
+      "run_at": "document_start"
+    },
+    {
+      "matches": ["https://jimeng.jianying.com/*"],
+      "js": ["jimeng_image/content.js"],
+      "css": ["jimeng_image/styles.css"],
+      "run_at": "document_end"
+    },
+    {
+      "matches": ["https://www.qianwen.com/*"],
+      "js": ["qianwen/content.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["dreamina/interceptor.js"],
+      "matches": [
+        "https://dreamina.capcut.com/*",
+        "https://jimeng.jianying.com/*"
+      ]
+    },
+    {
+      "resources": ["xyq/inject.js"],
+      "matches": ["*://xyq.jianying.com/*"]
+    }
+  ]
+}
