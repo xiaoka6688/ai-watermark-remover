@@ -23,7 +23,7 @@
   - `74cb9cd` chore: 添加 .gitattributes 强制 LF 行尾
 
 **待办（下个会话做）**：
-- [ ] **P1-03 治理 `doubao-downloader.user.js` 黑盒**（A/B/C 方案待定）
+- [ ] **P1-04 持久化 15s 浮窗开关**
 
 **变更文件清单**：
 - 新增 `.gitignore`、`.gitattributes`
@@ -194,7 +194,7 @@
 |---|---|---|---|
 | P1-01 持久化 videoList | 🟢 已完成 | 2026-07-01 | 内存缓存 + chrome.storage.local + 500 条软上限 + CLEAR_VIDEO_LIST 消息 |
 | P1-02 清理 .bak | 🟢 已完成 | 2026-07-01 | 初始化 git 仓库；挪到 docs/archive/；3 次规范提交（.gitignore / v1.2.0 主功能 / .gitattributes） |
-| P1-03 治理 doubao-downloader | ⚪ 未开始 | — | |
+| P1-03 治理 doubao-downloader | 🟢 已完成 | 2026-07-01 | 22880 行 → ~280 行轻量版；JSON.parse 拦截保留；旧版归档 docs/archive/ |
 | P1-04 持久化 15s 开关 | ⚪ 未开始 | — | |
 | P1-05 统一错误通知 | ⚪ 未开始 | — | |
 | P1-06 跨标签去重 | ⚪ 未开始 | — | |
@@ -250,27 +250,22 @@
 
 ### 当前正在做
 
-✅ **P1-02 清理 background.js.bak + 初始化 git 仓库**（已完成 2026-07-01）
+✅ **P1-03 治理 doubao-downloader.user.js**（已完成 2026-07-01）
 
 ### 下一个该做的
 
-📌 **P1-03：治理 `doubao-downloader.user.js` 黑盒**
+📌 **P1-04：持久化 15s 浮窗开关（`doubao_video/duration15.js`）**
 
 任务描述：
-- `doubao_image/doubao-downloader.user.js` 是 1MB+ 的 Vite 编译产物，调试/改动极其困难
-- 注入方式：`world: "MAIN"`，等于直接执行第三方代码
-- 治理方向（请选择）：
-  - **方案 A（最稳）**：保留 user.js 原样，但在 `tools/` 加 `rebuild-doubao-image.sh`，源码单独放 `doubao_image/src/`，需要改动时重建
-  - **方案 B（彻底）**：找/写一个轻量替代品，从 0 开始
-  - **方案 C（最简）**：本期不动，留作技术债，标记到 P2-08 TS 重构一起做
-- 当前建议：先做方案 A，保留可观测性
-
-参考经验：`docs/EXPERIENCE.md` 中"黑盒依赖"处理模式
+- `duration15.js` 的 15s 时长开关默认关闭，需要点击右下角浮窗启用 → 刷新页面才生效
+- 当前状态存 `localStorage.getItem('xq_d15_enabled')`，仅页面级
+- 改为：`chrome.storage.sync`（跨设备同步）+ `chrome.storage.local`（本机持久化）
+- 增加 popup 内开关（不依赖浮窗）
 
 验收：
-- [ ] 选定方案 A/B/C
-- [ ] 在 CHANGELOG / PROJECT_STATUS 记录决定
-- [ ] 现行功能未受影响（用户已加载的扩展需重新加载）
+- [ ] 关闭浏览器后再开，15s 开关状态仍在
+- [ ] popup.html 中有 15s 开关
+- [ ] 现行功能未受影响
 
 ### 关键文件位置速查
 

@@ -78,8 +78,8 @@
     },
     {
       "matches": ["https://www.doubao.com/*"],
-      "js": ["doubao_image/doubao-downloader.user.js"],
-      "run_at": "document_end",
+      "js": ["doubao_image/content.js"],
+      "run_at": "document_start",
       "world": "MAIN"
     },
     {

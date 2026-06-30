@@ -43,6 +43,38 @@
 
 ---
 
+### `doubao-downloader.user.js.v1.2.6.bak`（2025-06-26 版本）
+
+| 字段 | 值 |
+|---|---|
+| **来源** | `doubao_image/doubao-downloader.user.js`（Vite + vite-plugin-monkey 编译产物） |
+| **版本** | v1.2.6（豆包下载器 Tampermonkey 脚本移植版） |
+| **大小** | 1,062,085 字节 / 22,880 行 |
+| **状态** | ⚠️ **已废弃，已被 `doubao_image/content.js` 替代** |
+| **归档时间** | 2026-07-01（P1-03 任务） |
+
+#### 为什么归档？
+
+- 1MB+ 的编译产物，调试极其困难（无法设断点、无法理解上下文）
+- 包含 React + Dexie + StreamSaver.js + FileSaver.js 完整依赖栈（全部内联打包）
+- 与项目其他模块（`qianwen/`、`dreamina/` 等）代码风格完全不一致
+
+#### 轻量替代方案（`doubao_image/content.js`，~280 行）
+
+保留了原版最核心的机制——`JSON.parse` 猴子补丁拦截 `creations` 响应：
+- `JSON.parse` 劫持 → 递归搜索 `creations[] → image.image_ori_raw.url`
+- 同时修补 `image_ori/preview/thumb` URL，让页面直接显示无水印图
+- 去掉了 React UI、Dexie IndexedDB、StreamSaver.js 流式 ZIP
+- 改用轻量 DOM 浮窗 + `chrome.runtime.sendMessage` 下载 + `chrome.storage.local` 持久化
+
+#### 如果轻量版出问题？
+
+1. 从本文件恢复：`cp docs/archive/doubao-downloader.user.js.v1.2.6.bak doubao_image/doubao-downloader.user.js`
+2. 在 `manifest.json` 里把 `doubao_image/content.js` 改回 `doubao_image/doubao-downloader.user.js`
+3. 刷新扩展
+
+---
+
 ## 🔒 维护规则
 
 1. **只读**：本目录文件不参与构建，编辑器打开只看不改

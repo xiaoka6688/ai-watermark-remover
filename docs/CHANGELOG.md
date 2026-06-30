@@ -11,6 +11,13 @@
 
 ### 已完成（本会话）
 
+- [x] **P1-03 治理 `doubao-downloader.user.js` 黑盒**（方案 A）
+  - 原版 22,880 行 1MB+ Vite 编译产物 → 轻量版 ~280 行 `doubao_image/content.js`
+  - 保留核心机制：`JSON.parse` 猴子补丁拦截 `creations` 响应
+  - 去掉 React UI / Dexie IndexedDB / StreamSaver.js / FileSaver.js
+  - 改用轻量 DOM 浮窗 + `chrome.runtime.sendMessage` 下载 + `chrome.storage.local` 持久化
+  - 旧版归档到 `docs/archive/doubao-downloader.user.js.v1.2.6.bak`
+  - `manifest.json` 注入脚本已替换（`run_at: document_start`）
 - [x] **P1-02 清理 `background.js.bak` + 初始化 git 仓库**
   - 旧版 `background.js.bak`（385 行，含已下线的 zbgd.vip 授权验证机制）挪到 `docs/archive/background.js.v1.1.0.bak`
   - 新建 `docs/archive/README.md`（归档机制 + 旧版 vs 新版对比表）
@@ -38,7 +45,6 @@
 
 ### 计划中
 
-- [ ] P1-03 治理 doubao-downloader.user.js
 - [ ] P1-04 持久化 15s 浮窗开关
 - [ ] P1-05 统一错误通知
 - [ ] P1-06 跨标签页去重
