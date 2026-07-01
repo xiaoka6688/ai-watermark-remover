@@ -419,11 +419,11 @@ chrome.runtime.onMessage.addListener(
     // 15s 状态
     if (message.type === 'GET_15S_STATE') {
       chrome.storage.local.get(
-        [STORAGE_KEYS.XQ_D15_ENABLED, STORAGE_KEYS.XQ_D15_DURATION],
+        [STORAGE_KEYS.AIWM_D15_ENABLED, STORAGE_KEYS.XQ_D15_DURATION],
         (result) => {
           sendResponse({
             success: true,
-            enabled: result[STORAGE_KEYS.XQ_D15_ENABLED] === true,
+            enabled: result[STORAGE_KEYS.AIWM_D15_ENABLED] === true,
             duration: Number(result[STORAGE_KEYS.XQ_D15_DURATION]) || 0,
           });
         }
@@ -434,7 +434,7 @@ chrome.runtime.onMessage.addListener(
     if (message.type === 'SET_15S_ENABLED') {
       const msg = message as { type: 'SET_15S_ENABLED'; value: boolean };
       chrome.storage.local.set(
-        { [STORAGE_KEYS.XQ_D15_ENABLED]: msg.value === true },
+        { [STORAGE_KEYS.AIWM_D15_ENABLED]: msg.value === true },
         () => {
           sendResponse({ success: true });
         }

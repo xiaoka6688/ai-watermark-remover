@@ -685,5 +685,43 @@ if (results.length > 30) {
 
 ---
 
-> 经验库创建于 2026-06-30
+### ✅ 仓库重建（git checkout --orphan）清理历史
+
+**场景**：项目经历多次迭代后，git 历史里积累了大量"清理旧品牌"、"修复 xxx"等无意义提交，想从干净状态重新开始。
+
+**操作步骤**：
+```bash
+# 1. 创建无历史的 orphan 分支
+git checkout --orphan clean-main
+
+# 2. 暂存所有文件
+git add -A
+
+# 3. 一次干净的初始提交
+git commit -m "feat: AI去水印 v1.3.0 - 初始发布"
+
+# 4. 删除旧分支引用
+git branch -D main
+
+# 5. 重命名新分支
+git branch -m clean-main main
+
+# 6. 强制推送到远程
+git push -f origin main
+```
+
+**效果**：
+- GitHub URL 不变
+- 提交历史只有 1 条干净的初始提交
+- 所有代码完整保留
+- 适合"项目重新定位"或"清理敏感历史"场景
+
+**注意事项**：
+- `git push -f` 会覆盖远程历史，协作项目需提前通知团队
+- 旧历史在本地 reflog 中仍可找回（`git reflog`，保留 90 天）
+- 如果有 PR/Issue 引用旧 commit hash，链接会失效
+
+---
+
+> 经验库最后更新：2026-07-01
 > 配套文档：[PROJECT_PLAN.md](./PROJECT_PLAN.md) · [PROJECT_STATUS.md](./PROJECT_STATUS.md) · [CHANGELOG.md](./CHANGELOG.md)
