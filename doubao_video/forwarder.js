@@ -141,18 +141,18 @@ function tryInjectForVideo(el) {
   if (el.dataset.doubaoVideoInjected) return;
 
   // 确认是真正的视频卡片
-  if (!(el.querySelector('[class*="cover-"]') ||
-        el.querySelector('[class*="video-player"]') ||
-        el.querySelector('[class*="play-icon"]'))) return;
+  const hasCover = el.querySelector('[class*="cover-"]');
+  const hasPlayer = el.querySelector('[class*="video-player"]');
+  const hasPlayIcon = el.querySelector('[class*="play-icon"]');
+  if (!(hasCover || hasPlayer || hasPlayIcon)) return;
 
   el.dataset.doubaoVideoInjected = '1';
   const messageId = findMessageId(el);
+  console.log(`[AI去水印·豆包] 注入视频按钮: messageId=${messageId || 'null'}`);
 
   if (messageId) {
-    // 有 messageId：走原有逻辑（精确下载）
     injectVideoDownloadButton(el, messageId);
   } else {
-    // 无 messageId：注入通用下载按钮（通过 MAIN world 获取最新视频 URL）
     injectGenericDownloadButton(el, 'video');
   }
 }
@@ -197,10 +197,12 @@ function tryInjectForImage(el) {
   if (!el.className.includes('block-image')) return;
   if (el.dataset.doubaoImageInjected) return;
 
-  // 确认是真正的图片卡片
-  if (!(el.querySelector('img') || el.querySelector('[class*="image-"]'))) return;
+  const hasImg = el.querySelector('img');
+  const hasImageClass = el.querySelector('[class*="image-"]');
+  if (!(hasImg || hasImageClass)) return;
 
   el.dataset.doubaoImageInjected = '1';
+  console.log('[AI去水印·豆包] 注入图片按钮');
   injectGenericDownloadButton(el, 'image');
 }
 
@@ -210,11 +212,9 @@ function scanAndInject() {
 }
 
 function scanAndInjectImages() {
-  document.querySelectorAll('[class*="block-image"]').forEach(tryInjectForImage);
-}
-
-function scanAndInject() {
-  scanAndInjectVideos();
+  const cards = document.querySelectorAll('[class*="block-image"]');
+  console.log(`[AI去水印·豆包] 扫描到 ${cards.length} 个图片卡片`);
+  cards.forEach(tryInjectForImage);
 }
 
 // ==================== DOM 观察 ====================
