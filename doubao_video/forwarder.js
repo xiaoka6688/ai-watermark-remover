@@ -38,7 +38,8 @@ function injectStyles() {
       opacity: 0;
       transform: translateY(6px) scale(0.96);
     }
-    [class*="block-video"]:hover .doubao-dl-btn {
+    [class*="block-video"]:hover .doubao-dl-btn,
+    [class*="block-image"]:hover .doubao-dl-btn {
       opacity: 1;
       transform: translateY(0) scale(1);
     }
