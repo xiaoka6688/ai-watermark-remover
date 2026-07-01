@@ -39,7 +39,11 @@ function injectStyles() {
       transform: translateY(6px) scale(0.96);
     }
     [class*="block-video"]:hover .doubao-dl-btn,
-    [class*="block-image"]:hover .doubao-dl-btn {
+    [class*="block-image"]:hover .doubao-dl-btn,
+    [class*="creation"]:hover .doubao-dl-btn,
+    [class*="media"]:hover .doubao-dl-btn,
+    [class*="card"]:hover .doubao-dl-btn,
+    [class*="gallery"]:hover .doubao-dl-btn {
       opacity: 1;
       transform: translateY(0) scale(1);
     }
@@ -207,15 +211,43 @@ function tryInjectForImage(el) {
   injectGenericDownloadButton(el, 'image');
 }
 
-function scanAndInject() {
-  scanAndInjectVideos();
-  scanAndInjectImages();
+function scanAndInjectVideos() {
+  const selectors = [
+    '[class*="block-video"]',
+    '[class*="video-card"]',
+    '[class*="media-card"]',
+    '[class*="creation-card"]',
+    '[class*="gallery-item"]'
+  ];
+  let total = 0;
+  for (const sel of selectors) {
+    const cards = document.querySelectorAll(sel);
+    cards.forEach(tryInjectForVideo);
+    total += cards.length;
+  }
+  if (total > 0) console.log(`[AI去水印·豆包] 扫描到 ${total} 个视频卡片`);
 }
 
 function scanAndInjectImages() {
-  const cards = document.querySelectorAll('[class*="block-image"]');
-  console.log(`[AI去水印·豆包] 扫描到 ${cards.length} 个图片卡片`);
-  cards.forEach(tryInjectForImage);
+  const selectors = [
+    '[class*="block-image"]',
+    '[class*="image-card"]',
+    '[class*="media-card"]',
+    '[class*="creation-card"]',
+    '[class*="gallery-item"]'
+  ];
+  let total = 0;
+  for (const sel of selectors) {
+    const cards = document.querySelectorAll(sel);
+    cards.forEach(tryInjectForImage);
+    total += cards.length;
+  }
+  if (total > 0) console.log(`[AI去水印·豆包] 扫描到 ${total} 个图片卡片`);
+}
+
+function scanAndInject() {
+  scanAndInjectVideos();
+  scanAndInjectImages();
 }
 
 // ==================== DOM 观察 ====================
