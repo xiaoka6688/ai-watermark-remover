@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI去水印</title>
+  <style>
+    :root {
+      --bg: #f8fafc; --card-bg: #fff; --border: #e2e8f0; --text: #0f172a;
+      --text-secondary: #334155; --text-muted: #64748b; --accent: #2563eb;
+      --accent-bg: #eff6ff; --accent-border: #bfdbfe; --danger: #ef4444;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a; --card-bg: #1e293b; --border: #334155; --text: #f1f5f9;
+        --text-secondary: #cbd5e1; --text-muted: #94a3b8; --accent: #3b82f6;
+        --accent-bg: #1e3a5f; --accent-border: #1e40af; --danger: #f87171;
+      }
+    }
+    [data-theme="dark"] {
+      --bg: #0f172a; --card-bg: #1e293b; --border: #334155; --text: #f1f5f9;
+      --text-secondary: #cbd5e1; --text-muted: #94a3b8; --accent: #3b82f6;
+      --accent-bg: #1e3a5f; --accent-border: #1e40af; --danger: #f87171;
+    }
+    body { font-family: Arial, sans-serif; margin: 0; padding: 14px; width: 320px; background: var(--bg); color: var(--text); }
+    h1 { font-size: 18px; margin: 0 0 10px; }
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+    .item { font-size: 13px; line-height: 1.7; color: var(--text-secondary); }
+    .muted { color: var(--text-muted); font-size: 12px; }
+    .stats {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      background: var(--accent-bg);
+      border-radius: 8px;
+      border: 1px solid var(--accent-border);
+      margin-bottom: 10px;
+    }
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-left: 6px;
+    }
+    .btn {
+      display: inline-block;
+      padding: 6px 14px;
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      margin-top: 6px;
+    }
+    .btn:hover { background: #1d4ed8; }
+  </style>
+</head>
+<body>
+  <h1>AI去水印</h1>
+  <div class="card">
+    <div class="item">✅ Dreamina / 即梦 视频下载</div>
+    <div class="item">✅ 豆包视频无水印下载</div>
+    <div class="item">✅ 豆包图片下载</div>
+    <div class="item">✅ 豆包视频生成 15s 时长扩展</div>
+    <div class="item">✅ 小云雀（xyq.jianying.com）无水印下载</div>
+    <div class="item">✅ 即梦图片去水印下载（Canvas 重绘去水印）</div>
+    <div class="item">✅ 千问图片/视频无水印下载</div>
+  </div>
+  <div class="stats">
+    <span class="stat-value" id="videoCount">-</span>
+    <span class="stat-label">豆包已捕获视频</span>
+  </div>
+  <div class="card" style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;">
+    <div>
+      <div style="font-size:13px;font-weight:600;">豆包 15s 时长扩展</div>
+      <div style="font-size:11px;color:#64748b;">开启后视频生成页多出 15s 选项</div>
+    </div>
+    <label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer;">
+      <input type="checkbox" id="toggle15s" style="opacity:0;width:0;height:0;">
+      <span id="toggle15sSlider" style="position:absolute;top:0;left:0;right:0;bottom:0;background:#cbd5e1;border-radius:24px;transition:0.3s;"></span>
+    </label>
+  </div>
+  <div class="card muted" style="font-size:12px; line-height:1.7;">
+    <strong>使用说明：</strong><br>
+    <strong>Dreamina/即梦：</strong> 打开 dreamina.capcut.com 或 jimeng.jianying.com，视频右下角出现下载按钮。<br><br>
+    <strong>豆包视频：</strong> 打开 www.doubao.com 对话，视频右上角出现下载按钮。<br><br>
+    <strong>豆包图片：</strong> 打开 www.doubao.com，图片右上角出现下载按钮。<br><br>
+    <strong>豆包15秒时长：</strong> 打开 www.doubao.com 视频生成页面，时长下拉菜单中会多出 <strong>15s</strong> 选项，选中后自动生效。<br><br>
+    <strong>小云雀：</strong> 打开 xyq.jianying.com，鼠标悬停在视频卡片上点击右上角下载图标，或使用顶部工具栏批量下载。<br><br>
+    <strong>即梦图片：</strong> 打开 jimeng.jianying.com，图片右下角自动出现下载按钮，点击即可下载去水印图片。<br><br>
+    <strong>千问：</strong> 打开 www.qianwen.com，图片/视频右下角自动出现下载按钮，点击即可下载。<br><br>
+    按钮直接点击即可下载无水印文件。
+  </div>
+  <button class="btn" id="refreshBtn">刷新统计</button>
+  <button class="btn" id="clearBtn" style="background:#ef4444;margin-left:6px;">清空数据</button>
+  <script>
+    // ========== 统一通知 toast ==========
+    function showNotifyToast(entry) {
+      const colors = { error: '#ef4444', warn: '#f59e0b', info: '#2563eb' };
+      const toast = document.createElement('div');
+      toast.style.cssText = `
+        position: fixed; top: 8px; left: 8px; right: 8px; z-index: 9999;
+        background: ${colors[entry.level] || colors.info}; color: #fff;
+        padding: 8px 12px; border-radius: 8px; font-size: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        opacity: 0; transition: opacity 0.3s;
+      `;
+      const ctx = entry.context ? `[${entry.context}] ` : '';
+      toast.textContent = `${ctx}${entry.msg}`;
+      document.body.appendChild(toast);
+      requestAnimationFrame(() => { toast.style.opacity = '1'; });
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    // 启动时读取并显示积压的通知
+    chrome.runtime.sendMessage({type: 'CONSUME_NOTIFICATIONS'}, (resp) => {
+      if (resp?.success && resp.data?.length) {
+        resp.data.forEach((entry, i) => {
+          setTimeout(() => showNotifyToast(entry), i * 500); // 错开显示
+        });
+      }
+    });
+
+    // 实时监听 storage 变化（SW 写入 notification 时立即弹 toast）
+    chrome.storage.onChanged.addListener((changes, area) => {
+      if (area === 'local' && changes.notifications) {
+        const list = changes.notifications.newValue;
+        if (Array.isArray(list)) {
+          list.forEach((entry) => showNotifyToast(entry));
+          // 读完后清空（避免 popup 关闭再打开重复显示）
+          chrome.storage.local.remove('notifications');
+        }
+      }
+    });
+
+    // ========== 豆包视频统计 ==========
+    function refreshVideoCount() {
+      chrome.runtime.sendMessage({type: 'GET_VIDEO_LIST'}, (resp) => {
+        const count = resp?.data?.length || 0;
+        document.getElementById('videoCount').textContent = count;
+      });
+    }
+    document.getElementById('refreshBtn').addEventListener('click', refreshVideoCount);
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      if (!confirm('确认清空所有豆包视频统计？此操作不可恢复。')) return;
+      chrome.runtime.sendMessage({type: 'CLEAR_VIDEO_LIST'}, (resp) => {
+        if (resp?.success) {
+          document.getElementById('videoCount').textContent = 0;
+          alert('已清空');
+        }
+      });
+    });
+
+    // ========== 15s 时长开关 ==========
+    const toggle15s = document.getElementById('toggle15s');
+    const slider15s = document.getElementById('toggle15sSlider');
+
+    function updateToggleUI(enabled) {
+      toggle15s.checked = enabled;
+      slider15s.style.background = enabled ? '#2563eb' : '#cbd5e1';
+      slider15s.innerHTML = enabled
+        ? '<span style="position:absolute;height:18px;width:18px;left:24px;bottom:3px;background:#fff;border-radius:50%;transition:0.3s;"></span>'
+        : '<span style="position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:0.3s;"></span>';
+    }
+
+    chrome.runtime.sendMessage({type: 'GET_15S_STATE'}, (resp) => {
+      if (resp?.success) updateToggleUI(resp.enabled);
+    });
+
+    toggle15s.addEventListener('change', () => {
+      const newVal = toggle15s.checked;
+      chrome.runtime.sendMessage({type: 'SET_15S_ENABLED', value: newVal}, (resp) => {
+        if (resp?.success) {
+          updateToggleUI(newVal);
+          const tip = document.createElement('div');
+          tip.style.cssText = 'position:fixed;top:10px;left:50%;transform:translateX(-50%);background:#2563eb;color:#fff;padding:6px 16px;border-radius:8px;font-size:12px;z-index:999;';
+          tip.textContent = newVal ? '✅ 已启用，请刷新豆包页面' : '🔴 已关闭，请刷新豆包页面';
+          document.body.appendChild(tip);
+          setTimeout(() => tip.remove(), 2000);
+        }
+      });
+    });
+
+    // 自动加载
+    refreshVideoCount();
+  </script>
+</body>
+</html>

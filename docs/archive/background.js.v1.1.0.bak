@@ -1,0 +1,385 @@
+// ========== 小柒去水印插件 - Background Service Worker ==========
+// 同时支持 Dreamina/即梦 + 豆包视频下载 + 豆包图片下载
+
+// ==================== 验证授权机制 ====================
+
+const AUTH_CHECK_URL = 'https://zbgd.vip/forum.php?mod=viewthread&tid=2125&extra=';
+const AUTH_REQUIRED_TEXT = '水印验证';
+const AUTH_CACHE_KEY = 'authCache';
+const AUTH_CACHE_TTL = 180 * 24 * 60 * 60 * 1000; // 180 天
+const AUTH_FAIL_CACHE_TTL = 30 * 1000; // 失败缓存 30 秒
+
+let authCache = null;
+
+async function loadAuthCache() {
+  if (authCache) return authCache;
+  try {
+    const data = await chrome.storage.local.get([AUTH_CACHE_KEY]);
+    authCache = data?.[AUTH_CACHE_KEY] || null;
+  } catch {
+    authCache = null;
+  }
+  return authCache;
+}
+
+async function saveAuthCache(cache) {
+  authCache = cache;
+  try {
+    await chrome.storage.local.set({ [AUTH_CACHE_KEY]: cache });
+  } catch {}
+}
+
+async function clearAuthCache() {
+  authCache = null;
+  try {
+    await chrome.storage.local.remove([AUTH_CACHE_KEY]);
+  } catch {}
+}
+
+function formatDateTime(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  const ss = String(d.getSeconds()).padStart(2, '0');
+  return `${y}-${m}-${day} ${hh}:${mm}:${ss}`;
+}
+
+function buildAuthResult(ok, message, extra = {}) {
+  return {
+    ok,
+    message,
+    checkedAt: Date.now(),
+    url: AUTH_CHECK_URL,
+    ...extra
+  };
+}
+
+async function verifyAuth(force = false) {
+  const cache = await loadAuthCache();
+  const now = Date.now();
+
+  if (!force && cache?.checkedAt) {
+    const ttl = cache.ok ? AUTH_CACHE_TTL : AUTH_FAIL_CACHE_TTL;
+    if (now - cache.checkedAt < ttl) {
+      return {
+        ...cache,
+        message: cache.ok
+          ? `本地授权有效，截止 ${formatDateTime(cache.validUntil)}`
+          : (cache.message || '验证失败')
+      };
+    }
+  }
+
+  try {
+    const resp = await fetch(AUTH_CHECK_URL, {
+      method: 'GET',
+      credentials: 'include',
+      cache: 'no-store'
+    });
+
+    const html = await resp.text();
+    const normalized = String(html || '').replace(/\s+/g, ' ');
+    const deniedMarkers = [
+      '抱歉，指定的主题不存在或已被删除或正在被审核',
+      '您访问的页面无手机页面',
+      '帖子不存在',
+      '主题不存在',
+      '404',
+      'not found'
+    ];
+
+    const denied = deniedMarkers.some(marker => normalized.toLowerCase().includes(marker.toLowerCase()));
+    const looksLikeThread = /viewthread|thread_subject|postlist|tid=2125|主题|发表于|回复/.test(normalized);
+    const hasRequiredText = normalized.includes(AUTH_REQUIRED_TEXT);
+
+    const result = resp.ok && !denied && looksLikeThread && hasRequiredText
+      ? buildAuthResult(true, '验证通过，可正常使用', {
+          matchedText: AUTH_REQUIRED_TEXT,
+          validUntil: now + AUTH_CACHE_TTL,
+          validUntilText: formatDateTime(now + AUTH_CACHE_TTL)
+        })
+      : buildAuthResult(false, `验证未通过：帖子中未找到"${AUTH_REQUIRED_TEXT}"`);
+
+    await saveAuthCache(result);
+    return result;
+  } catch (e) {
+    const failResult = buildAuthResult(false, `验证失败：${e.message || '网络错误'}`);
+    await saveAuthCache(failResult);
+    return failResult;
+  }
+}
+
+/** 验证拦截：所有下载操作前先检查授权 */
+async function checkAuthFirst() {
+  const auth = await verifyAuth(false);
+  if (!auth.ok) {
+    throw new Error('授权未通过，无法使用下载功能');
+  }
+  return auth;
+}
+
+// ==================== 原有功能 ====================
+
+let latestRequestedFilename = null;
+let latestRequestedTime = 0;
+const pendingDownloads = new Map();
+const videoList = [];
+
+// ==================== 豆包分享API（回退方案） ====================
+
+async function callBigmusicShareSave(messageId) {
+  const apiUrl = 'https://api-normal.doubao.com/alice/media/bigmusic/share_save?' +
+    'version_code=20800&language=zh&device_platform=web&aid=497858&real_aid=497858' +
+    '&pkg_type=release_version&device_id=0&pc_version=3.14.6&region=CN&sys_region=CN' +
+    '&samantha_web=1&use-olympus-account=1';
+
+  try {
+    const resp = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify({ message_id: messageId })
+    });
+    const data = await resp.json();
+    if (data.code === 0 && data.data) {
+      const shareId = data.data.share_id;
+      return {
+        success: true,
+        share_id: shareId,
+        share_url: data.data.share_url || `https://www.doubao.com/video-sharing?share_id=${shareId}`
+      };
+    }
+    return { success: false, error: `API错误: code=${data.code}, msg=${data.msg}` };
+  } catch (e) {
+    return { success: false, error: e.message };
+  }
+}
+
+// ==================== 下载函数 ====================
+
+async function downloadVideo(url, filename, saveAs = false) {
+  pendingDownloads.set(url, filename);
+  const downloadId = await chrome.downloads.download({
+    url,
+    filename,
+    saveAs,
+    conflictAction: 'uniquify'
+  });
+  return { success: true, downloadId, filename };
+}
+
+// ==================== 文件命名拦截 ====================
+
+chrome.downloads.onDeterminingFilename.addListener((item, suggest) => {
+  if (item.byExtensionId !== chrome.runtime.id) return;
+
+  if (pendingDownloads.has(item.url)) {
+    const filename = pendingDownloads.get(item.url);
+    pendingDownloads.delete(item.url);
+    suggest({ filename, conflictAction: 'uniquify' });
+    return;
+  }
+
+  if (latestRequestedFilename && (Date.now() - latestRequestedTime < 10000)) {
+    suggest({ filename: latestRequestedFilename, conflictAction: 'uniquify' });
+  }
+});
+
+// ==================== 消息处理 ====================
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+
+  // ---- 验证授权查询（供 popup 使用） ----
+  if (message.action === 'check_auth') {
+    if (message.force) {
+      clearAuthCache()
+        .then(() => verifyAuth(true))
+        .then(auth => sendResponse(auth))
+        .catch(error => sendResponse(buildAuthResult(false, `验证失败：${error.message || '网络错误'}`, {
+          validUntil: 0,
+          validUntilText: '0'
+        })));
+    } else {
+      verifyAuth(false).then(auth => sendResponse(auth));
+    }
+    return true;
+  }
+  
+  // ---- Dreamina / 即梦 下载 ----
+  if (message.action === 'DOWNLOAD') {
+    checkAuthFirst().then(() => {
+      latestRequestedFilename = message.filename || `dreamina_video_${Date.now()}.mp4`;
+      latestRequestedTime = Date.now();
+      chrome.downloads.download({
+        url: message.url,
+        filename: latestRequestedFilename,
+        saveAs: true,
+        conflictAction: 'uniquify'
+      }, (downloadId) => {
+        if (chrome.runtime.lastError) {
+          sendResponse({ success: false, error: chrome.runtime.lastError.message });
+        } else {
+          sendResponse({ success: true, downloadId });
+        }
+      });
+    }).catch(err => sendResponse({ success: false, error: err.message }));
+    return true;
+  }
+
+  if (message.action === 'download_video') {
+    checkAuthFirst().then(() => {
+      const url = message.url;
+      const dateStr = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+      let filename = `下载_${dateStr}.mp4`;
+      try {
+        const urlObj = new URL(url);
+        const targetName = urlObj.searchParams.get('filename');
+        if (targetName) filename = targetName;
+      } catch (_) {}
+      chrome.downloads.download({ url, filename, saveAs: false, conflictAction: 'uniquify' }, () => {
+        if (chrome.runtime.lastError) {
+          sendResponse({ success: false, error: chrome.runtime.lastError.message });
+        } else {
+          sendResponse({ success: true });
+        }
+      });
+    }).catch(err => sendResponse({ success: false, error: err.message }));
+    return true;
+  }
+
+  // ---- 豆包分享API（background 兜底调用） ----
+  if (message.type === 'bigmusicShareSave') {
+    callBigmusicShareSave(message.messageId)
+      .then(result => sendResponse(result))
+      .catch(e => sendResponse({ success: false, error: e.message }));
+    return true;
+  }
+
+  // ---- 豆包视频下载结果（来自 forwarder.js → content.js） ----
+  if (message.type === 'videoDownloadResult') {
+    checkAuthFirst().then(() => {
+      const data = message.data;
+      if (data?.success && data?.videoUrl) {
+        const rawId = data.vid || data.messageId || Date.now();
+        const sanitizedId = String(rawId).replace(/[\\/:*?"<>|]/g, '_');
+        const filename = `${sanitizedId}.mp4`;
+        downloadVideo(data.videoUrl, filename, false)
+          .then(() => sendResponse({ success: true }))
+          .catch(error => sendResponse({ success: false, error: error.message }));
+      } else {
+        sendResponse({ success: true });
+      }
+    }).catch(err => sendResponse({ success: false, error: err.message }));
+    return true;
+  }
+
+  // ---- 豆包视频数据统计 ----
+  if (message.type === 'videoDataExtracted') {
+    var newData = message.data || [];
+    var existingVids = new Set(videoList.map(function(v) { return v.vid; }));
+    var filtered = newData.filter(function(v) { return !existingVids.has(v.vid); });
+    if (filtered.length > 0) {
+      Array.prototype.push.apply(videoList, filtered);
+    }
+    sendResponse({ success: true });
+    return true;
+  }
+
+  if (message.type === 'GET_VIDEO_LIST') {
+    sendResponse({ success: true, data: videoList });
+    return true;
+  }
+
+  // ---- 豆包主动下载（popup 触发） ----
+  if (message.type === 'startVideoDownload') {
+    checkAuthFirst().then(() => {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (!tabs || !tabs.length) {
+          sendResponse({ success: false, error: '未找到活动标签页' });
+          return;
+        }
+        const tab = tabs[0];
+        if (tab.url && tab.url.includes('doubao.com')) {
+          chrome.tabs.sendMessage(tab.id, { type: 'startVideoDownload' }, (response) => {
+            if (chrome.runtime.lastError) {
+              sendResponse({ success: false, error: '无法连接到页面，请刷新页面后重试' });
+            } else {
+              sendResponse({ success: true, response });
+            }
+          });
+        } else {
+          sendResponse({ success: false, error: '请在豆包页面使用此功能' });
+        }
+      });
+    }).catch(err => sendResponse({ success: false, error: err.message }));
+    return true;
+  }
+
+  // ---- 千问文件下载（来自 qianwen_content.js） ----
+  if (message.type === 'downloadFile') {
+    checkAuthFirst().then(() => {
+      const url = message.url;
+      const filename = message.filename || `download_${Date.now()}.mp4`;
+      chrome.downloads.download({
+        url: url,
+        filename: filename,
+        saveAs: false,
+        conflictAction: 'uniquify'
+      }, (downloadId) => {
+        if (chrome.runtime.lastError) {
+          sendResponse({ success: false, error: chrome.runtime.lastError.message });
+        } else {
+          sendResponse({ success: true, downloadId });
+        }
+      });
+    }).catch(err => sendResponse({ success: false, error: err.message }));
+    return true;
+  }
+
+  // ---- 即梦图片下载（来自 jimeng_content.js，支持 Base64） ----
+  if (message.type === 'downloadImage') {
+    checkAuthFirst().then(() => {
+      (async () => {
+        try {
+          let url = message.url;
+          let filename = message.filename || `image_${Date.now()}.jpg`;
+
+          if (url.startsWith('data:')) {
+            const response = await fetch(url);
+            const blob = await response.blob();
+            url = URL.createObjectURL(blob);
+          }
+
+          chrome.downloads.download({
+            url: url,
+            filename: filename,
+            saveAs: false,
+            conflictAction: 'uniquify'
+          }, (downloadId) => {
+            if (chrome.runtime.lastError) {
+              sendResponse({ success: false, error: chrome.runtime.lastError.message });
+            } else {
+              sendResponse({ success: true, downloadId });
+            }
+          });
+
+          if (url.startsWith('blob:')) {
+            setTimeout(() => URL.revokeObjectURL(url), 5000);
+          }
+        } catch (e) {
+          sendResponse({ success: false, error: e.message });
+        }
+      })();
+    }).catch(err => sendResponse({ success: false, error: err.message }));
+    return true;
+  }
+});
+
+console.log('[小柒去水印插件] background service worker 已加载');

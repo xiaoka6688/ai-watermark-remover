@@ -1,0 +1,49 @@
+/* ============================================================
+   AI去水印 - 即梦图片去水印 样式
+   ============================================================ */
+
+/* Toast 消息 */
+.aiwm-jm-toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 100001;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    animation: xqSlideUp 0.3s ease;
+    white-space: nowrap;
+}
+
+@keyframes xqSlideUp {
+    from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+    to { transform: translateX(-50%) translateY(0); opacity: 1; }
+}
+
+/* 悬浮面板 */
+#aiwm-jm-panel {
+    user-select: none;
+}
+
+#aiwm-jm-panel:hover {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* 下载按钮外层容器 */
+.aiwm-jm-img-wrapper {
+    position: relative;
+    display: inline-block;
+    line-height: 0;
+}
+
+.aiwm-jm-img-wrapper button {
+    opacity: 0;
+}
+
+.aiwm-jm-img-wrapper:hover button {
+    opacity: 0.9 !important;
+}

@@ -1,0 +1,64 @@
+# ========== 行尾规范 ==========
+# 强制所有文本文件用 LF（Unix 风格），避免 Windows CRLF 污染 diff
+* text=auto eol=lf
+
+# ========== 显式声明二进制文件（避免 git 误改） ==========
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.icns binary
+*.svg binary
+*.pdf binary
+*.zip binary
+*.gz binary
+*.tar binary
+*.7z binary
+*.rar binary
+*.mp4 binary
+*.webm binary
+*.mov binary
+*.mp3 binary
+*.wav binary
+*.flac binary
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary
+*.pyc binary
+*.so binary
+*.dll binary
+*.exe binary
+*.node binary
+*.class binary
+*.jar binary
+
+# ========== 明确指定文本文件类型（启用语言检测） ==========
+*.js   text eol=lf
+*.mjs  text eol=lf
+*.cjs  text eol=lf
+*.ts   text eol=lf
+*.tsx  text eol=lf
+*.jsx  text eol=lf
+*.json text eol=lf
+*.md   text eol=lf
+*.txt  text eol=lf
+*.css  text eol=lf
+*.html text eol=lf
+*.xml  text eol=lf
+*.yml  text eol=lf
+*.yaml text eol=lf
+*.py   text eol=lf
+*.sh   text eol=lf
+*.bash text eol=lf
+*.zsh  text eol=lf
+*.fish text eol=lf
+*.gitignore text eol=lf
+*.gitattributes text eol=lf
+*.editorconfig text eol=lf
+
+# ========== 用户脚本（虽然二进制般大，但实际是文本） ==========
+*.user.js text eol=lf
+*.min.js text eol=lf

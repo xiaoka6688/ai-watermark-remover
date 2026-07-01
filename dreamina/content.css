@@ -1,0 +1,79 @@
+/* 极简下载按钮 - 与即梦图片统一风格 */
+.dreamina-dl-btn {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  z-index: 2147483647;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.62);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s, opacity 0.18s ease;
+  opacity: 0;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* JS 控制的显示状态 */
+.dreamina-dl-btn.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.dreamina-dl-btn.is-visible:hover {
+  background: rgba(0, 0, 0, 0.82);
+  transform: scale(1.05);
+}
+
+.dreamina-dl-btn.is-visible:active {
+  transform: scale(0.97);
+}
+
+.dreamina-dl-btn svg {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.18s ease;
+}
+
+.dreamina-dl-btn:hover svg {
+  transform: translateY(1px);
+}
+
+/* 下载中状态 */
+.dreamina-dl-btn.is-busy {
+  opacity: 1;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.dreamina-dl-btn.is-busy svg {
+  animation: dreamina-dl-pulse 1s ease-in-out infinite;
+}
+
+/* 进度文本 */
+.dreamina-dl-btn .dl-progress {
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+}
+
+@keyframes dreamina-dl-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 0.7;
+    transform: translateY(1px);
+  }
+}

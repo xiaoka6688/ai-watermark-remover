@@ -1,0 +1,33 @@
+{
+  "name": "ai-watermark-remover",
+  "version": "1.2.0",
+  "description": "AI去水印 - Chrome Extension",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "jest --verbose",
+    "test:e2e": "playwright test",
+    "test:all": "npm test && npm run test:e2e",
+    "lint": "eslint src/ lib/ tests/",
+    "lint:fix": "eslint src/ lib/ tests/ --fix",
+    "format": "prettier --write \"src/**/*.ts\" \"lib/**/*.js\" \"tests/**/*.js\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"lib/**/*.js\" \"tests/**/*.js\"",
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@anthropic-ai/sdk": "^0.109.0",
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.61.1",
+    "@types/chrome": "^0.2.0",
+    "eslint": "^10.6.0",
+    "eslint-config-prettier": "^10.1.8",
+    "jest": "^29.7.0",
+    "prettier": "^3.9.4",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.62.1",
+    "vite": "^8.1.2",
+    "vite-plugin-web-extension": "^4.5.1"
+  }
+}
