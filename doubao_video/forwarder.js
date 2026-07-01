@@ -145,14 +145,72 @@ function tryInjectForVideo(el) {
         el.querySelector('[class*="video-player"]') ||
         el.querySelector('[class*="play-icon"]'))) return;
 
+  el.dataset.doubaoVideoInjected = '1';
   const messageId = findMessageId(el);
+
   if (messageId) {
+    // 有 messageId：走原有逻辑（精确下载）
     injectVideoDownloadButton(el, messageId);
+  } else {
+    // 无 messageId：注入通用下载按钮（通过 MAIN world 获取最新视频 URL）
+    injectGenericDownloadButton(el, 'video');
   }
 }
 
-function scanAndInjectVideos() {
-  document.querySelectorAll('[class*="block-video"]').forEach(tryInjectForVideo);
+// 通用下载按钮（不依赖 messageId）
+function injectGenericDownloadButton(container, type) {
+  if (container.dataset.doubaoGenericInjected) return;
+  container.dataset.doubaoGenericInjected = '1';
+
+  if (getComputedStyle(container).position === 'static') {
+    container.style.position = 'relative';
+  }
+
+  const btn = document.createElement('button');
+  btn.className = 'doubao-dl-btn';
+  btn.title = type === 'video' ? '下载无水印视频' : '下载图片';
+  btn.innerHTML = DOWNLOAD_ICON;
+
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    btn.disabled = true;
+    btn.classList.add('doubao-dl-busy');
+    btn.innerHTML = '<svg class="animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg>';
+
+    // 通过 postMessage 请求 content.js (MAIN world) 获取最新 URL
+    window.postMessage({ type: 'startVideoDownload' }, '*');
+
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.classList.remove('doubao-dl-busy');
+      btn.innerHTML = DOWNLOAD_ICON;
+    }, 3000);
+  });
+
+  container.appendChild(btn);
+}
+
+// 图片卡片注入
+function tryInjectForImage(el) {
+  if (!el.className || typeof el.className !== 'string') return;
+  if (!el.className.includes('block-image')) return;
+  if (el.dataset.doubaoImageInjected) return;
+
+  // 确认是真正的图片卡片
+  if (!(el.querySelector('img') || el.querySelector('[class*="image-"]'))) return;
+
+  el.dataset.doubaoImageInjected = '1';
+  injectGenericDownloadButton(el, 'image');
+}
+
+function scanAndInject() {
+  scanAndInjectVideos();
+  scanAndInjectImages();
+}
+
+function scanAndInjectImages() {
+  document.querySelectorAll('[class*="block-image"]').forEach(tryInjectForImage);
 }
 
 function scanAndInject() {
@@ -175,11 +233,17 @@ function startDOMObserver() {
       if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
         for (const node of mutation.addedNodes) {
           if (node.nodeType !== 1) continue;
-          if (node.classList && typeof node.className === 'string' && node.className.includes('block-video')) {
-            tryInjectForVideo(node);
+          if (node.classList && typeof node.className === 'string') {
+            if (node.className.includes('block-video')) {
+              tryInjectForVideo(node);
+            }
+            if (node.className.includes('block-image')) {
+              tryInjectForImage(node);
+            }
           }
           if (node.querySelectorAll) {
             node.querySelectorAll('[class*="block-video"]').forEach(tryInjectForVideo);
+            node.querySelectorAll('[class*="block-image"]').forEach(tryInjectForImage);
           }
         }
         needRescan = true;
