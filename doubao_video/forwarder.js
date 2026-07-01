@@ -15,24 +15,24 @@ function injectStyles() {
   style.textContent = `
     .doubao-dl-btn {
       position: absolute;
-      top: 16px;
       right: 16px;
+      bottom: 16px;
       z-index: 9999;
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      width: 34px;
-      height: 34px;
-      padding: 0;
-      border: 1px solid rgba(255, 255, 255, 0.28);
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.18);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      gap: 5px;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.62);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
       color: #ffffff;
+      font-size: 12px;
+      font-weight: 500;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
       cursor: pointer;
-      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
-      transition: opacity 0.18s ease, transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+      transition: background 0.2s, transform 0.15s, opacity 0.18s ease;
       pointer-events: auto;
       user-select: none;
       opacity: 0;
@@ -43,64 +43,53 @@ function injectStyles() {
       transform: translateY(0) scale(1);
     }
     .doubao-dl-btn:hover:not(:disabled) {
-      border-color: rgba(255, 255, 255, 0.36);
-      background: rgba(255, 255, 255, 0.24);
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
-      transform: translateY(-1px) scale(1.02);
+      background: rgba(0, 0, 0, 0.82);
+      transform: scale(1.05);
     }
     .doubao-dl-btn:active:not(:disabled) {
-      transform: translateY(0) scale(0.97);
-      background: rgba(255, 255, 255, 0.2);
+      transform: scale(0.97);
     }
     .doubao-dl-btn:disabled {
       cursor: not-allowed;
       opacity: 1;
     }
     .doubao-dl-btn svg {
-      width: 18px;
-      height: 18px;
-      transition: transform 0.18s ease, opacity 0.18s ease;
+      width: 14px;
+      height: 14px;
+      transition: transform 0.18s ease;
     }
     .doubao-dl-btn:hover svg {
       transform: translateY(1px);
     }
     .doubao-dl-btn.doubao-dl-busy {
-      opacity: 1 !important;
-      border-color: rgba(255, 255, 255, 0.4);
-      background: rgba(255, 255, 255, 0.24);
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+      opacity: 1;
+      pointer-events: none;
+      background: rgba(0, 0, 0, 0.4);
+    }
+    .doubao-dl-btn.doubao-dl-busy svg.animate-spin {
+      animation: doubao-spin 1s linear infinite;
     }
     .doubao-dl-btn.doubao-dl-success {
-      opacity: 1 !important;
-      color: #ffffff;
-      border-color: rgba(255, 255, 255, 0.42);
+      opacity: 1;
       background: rgba(16, 185, 129, 0.28);
     }
     .doubao-dl-btn.doubao-dl-error {
-      opacity: 1 !important;
-      color: #ffffff;
-      border-color: rgba(255, 255, 255, 0.38);
+      opacity: 1;
       background: rgba(239, 68, 68, 0.24);
     }
-    .doubao-dl-btn svg.animate-spin {
-      animation: doubao-spin 1s linear infinite;
-    }
-    .doubao-dl-btn.doubao-dl-busy svg:not(.animate-spin) {
-      animation: doubao-pulse 1s ease-in-out infinite;
+    .doubao-dl-btn .dl-progress-text {
+      font-size: 10px;
+      font-weight: 700;
     }
     @keyframes doubao-spin {
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
     }
-    @keyframes doubao-pulse {
-      0%, 100% { opacity: 1; transform: translateY(0); }
-      50% { opacity: 0.7; transform: translateY(1px); }
-    }
   `;
   document.head.appendChild(style);
 }
 
-const DOWNLOAD_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
+const DOWNLOAD_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> 无水印';
 const SUCCESS_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
 const ERROR_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
 

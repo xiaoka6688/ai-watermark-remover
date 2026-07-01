@@ -138,6 +138,7 @@
                 btn.title = '下载无水印视频';
                 btn.dataset.url = item.videoUrl;
                 btn.appendChild(downloadSvgTemplate.cloneNode(true));
+                btn.appendChild(document.createTextNode(' 无水印'));
 
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -154,6 +155,7 @@
                 btn.className = 'xyq-dl-btn xyq-dl-disabled';
                 btn.title = '未能获取到无水印链接';
                 btn.appendChild(disabledSvgTemplate.cloneNode(true));
+                btn.appendChild(document.createTextNode(' 不可用'));
             }
 
             btnWrap.appendChild(btn);
